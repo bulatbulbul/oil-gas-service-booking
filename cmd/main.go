@@ -3,12 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"oil-gas-service-booking/internal/config"
-	"oil-gas-service-booking/internal/models"
-
-	"gorm.io/driver/sqlite"
-	"gorm.io/gorm"
 	_ "modernc.org/sqlite" // драйвер без CGO
+	"oil-gas-service-booking/internal/config"
+	"oil-gas-service-booking/internal/storage"
 )
 
 func main() {
@@ -24,17 +21,14 @@ func main() {
 
 	// TODO init storage: сначала sqlite потом перейду на postgresql
 
-	db, err := gorm.Open(sqlite.Open("file:storage/storage.db?_foreign_keys=on"), &gorm.Config{})
+	// создаём стор (передаём cfg.Storage или строку "storage/storage.db")
+	store, err := storage.NewStorage(cfg.Storage)
 	if err != nil {
-		log.Fatalf("failed to open db: %v", err)
+		log.Fatalf("new storage: %v", err)
 	}
+	defer store.Close()
 
-	log.Println("Database opened successfully!")
-
-	if err := db.AutoMigrate(&models.Company{}, &models.Service{}, &models.Booking{}); err != nil {
-		log.Fatalf("migrate failed: %v", err)
-	}
-	fmt.Println("Database migration completed successfully!")
+	log.Println("DB ready")
 
 	// TODO init router (вроде надо)
 

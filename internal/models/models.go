@@ -1,32 +1,52 @@
 package models
 
-// Company — сервисная компания
+import "time"
+
 type Company struct {
-	ID   uint   `gorm:"primaryKey"`
-	Name string `gorm:"not null"`
-	// Region      string
-	// Description string
-
-	// Связь: одна компания имеет много сервисов
-	Services []Service `gorm:"foreignKey:CompanyID"`
+	CompanyID int64     `json:"company_id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Service — конкретная услуга, предоставляемая компанией
 type Service struct {
-	ID        uint   `gorm:"primaryKey"`
-	CompanyID uint   `gorm:"not null;index"`
-	Title     string `gorm:"not null"`
-	// Description string
-	// Price       float64
-
-	// Связь: один сервис может иметь много броней
-	Bookings []Booking `gorm:"foreignKey:ServiceID"`
+	ServiceID int64     `json:"service_id"`
+	Title     string    `json:"title"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Booking — бронь клиента на услугу
+type CompanyService struct {
+	CompanyServiceID int64     `json:"company_service_id"`
+	CompanyID        int64     `json:"company_id"`
+	ServiceID        int64     `json:"service_id"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
+}
+
+type User struct {
+	UserID    int64     `json:"user_id"`
+	Name      string    `json:"name"`
+	Email     *string   `json:"email"`
+	Role      string    `json:"role"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
 type Booking struct {
-	ID         uint   `gorm:"primaryKey"`
-	ServiceID  uint   `gorm:"not null;index"`
-	ClientName string `gorm:"not null"`
-	Status     string `gorm:"default:'pending'"` // pending, confirmed, cancelled
+	BookingID   int64     `json:"booking_id"`
+	UserID      *int64    `json:"user_id"`
+	Description *string   `json:"description"`
+	Status      string    `json:"status"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
+type BookingService struct {
+	BookingServiceID int64     `json:"booking_service_id"`
+	BookingID        int64     `json:"booking_id"`
+	ServiceID        int64     `json:"service_id"`
+	Notes            *string   `json:"notes"`
+	CreatedAt        time.Time `json:"created_at"`
+	UpdatedAt        time.Time `json:"updated_at"`
 }
