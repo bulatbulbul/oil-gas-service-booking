@@ -1,2 +1,2 @@
 # ERD
-<img width="785" height="777" alt="ERD" src="https://github.com/user-attachments/assets/a948efd5-1f72-48f9-8ce3-9727b36d1196" />
+<img width="925" height="782" alt="ERD" src="https://github.com/user-attachments/assets/e5f15f92-e681-493f-ae23-c19c78f5b843" />
