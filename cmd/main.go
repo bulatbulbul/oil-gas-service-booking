@@ -2,24 +2,25 @@ package main
 
 import (
 	"fmt"
-	_ "modernc.org/sqlite" // драйвер без CGO
+	"log"
 	"oil-gas-service-booking/internal/config"
+	"oil-gas-service-booking/internal/storage"
 )
 
 func main() {
-
-	// мб фреймворком нужно подумать каким
-
-	// примерный план
-	// TODO init config (yaml нврн)
 	cfg := config.MustLoad()
-	fmt.Println(cfg)
+	fmt.Printf("%+v\n", cfg)
 
-	// TODO init logger: slog  (мб не надо)
+	gdb, err := storage.NewGorm(cfg.Storage)
+	if err != nil {
+		log.Fatalf("failed to init gorm: %v", err)
+	}
+	sqlDB, err := gdb.DB()
+	if err != nil {
+		log.Fatalf("gorm.DB(): %v", err)
+	}
+	defer sqlDB.Close()
 
-	// TODO init storage: сначала sqlite потом перейду на postgresql
-
-	// TODO init router (вроде надо)
-
-	// TODO run server
+	log.Println("GORM DB ready (migrations applied)")
+	_ = gdb
 }
