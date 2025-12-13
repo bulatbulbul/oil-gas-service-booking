@@ -41,6 +41,7 @@ type User struct {
 	UserID    int64     `gorm:"column:user_id;primaryKey;autoIncrement"`
 	Name      string    `gorm:"column:name;not null"`
 	Email     *string   `gorm:"column:email;uniqueIndex"`
+	Password  string    `gorm:"column:password;not null"`
 	Role      string    `gorm:"column:role;default:'customer'"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`

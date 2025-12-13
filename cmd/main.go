@@ -26,8 +26,6 @@ func main() {
 	userRepo := repository.NewUserRepo(db)
 	bookingRepo := repository.NewBookingRepo(db)
 	serviceRepo := repository.NewServiceRepo(db)
-
-	// Новый репозиторий для бизнес-логики
 	businessRepo := repository.NewBusinessRepo(db)
 
 	// Инициализируем хендлеры
@@ -35,22 +33,25 @@ func main() {
 	userHandler := handlers.NewUserHandler(userRepo)
 	bookingHandler := handlers.NewBookingHandler(bookingRepo)
 	serviceHandler := handlers.NewServiceHandler(serviceRepo)
-
-	// Новый хендлер для бизнес-логики
 	businessHandler := handlers.NewBusinessHandler(businessRepo)
+
+	// Auth handler (register/login)
+	authHandler := handlers.NewAuthHandler(db)
 
 	// Создаем роутер
 	r := router.NewRouter(
+		db,
 		companyHandler,
 		userHandler,
 		bookingHandler,
 		serviceHandler,
 		businessHandler,
+		authHandler,
 	)
 
 	// Запускаем сервер
-	log.Printf("Сервер запущен на %s", cfg.Address)
-	if err := http.ListenAndServe(cfg.Address, r); err != nil {
+	log.Printf("Сервер запущен на %s", cfg.HTTPServer.Address)
+	if err := http.ListenAndServe(cfg.HTTPServer.Address, r); err != nil {
 		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }

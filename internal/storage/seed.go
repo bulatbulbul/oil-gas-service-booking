@@ -1,11 +1,16 @@
 package storage
 
 import (
-	"log"
-
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"log"
 	"oil-gas-service-booking/internal/models"
 )
+
+func hashPassword(pw string) string {
+	hash, _ := bcrypt.GenerateFromPassword([]byte(pw), bcrypt.DefaultCost)
+	return string(hash)
+}
 
 // Seed наполняет БД тестовыми данными
 func Seed(db *gorm.DB) error {
@@ -49,12 +54,16 @@ func Seed(db *gorm.DB) error {
 		return err
 	}
 
+	// Users с хешированными паролями
+	pass1, _ := bcrypt.GenerateFromPassword([]byte("user123"), bcrypt.DefaultCost)
+	pass2, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+
 	email1 := "ivan@example.com"
 	email2 := "admin@example.com"
 
 	users := []models.User{
-		{Name: "Иван", Email: &email1, Role: "customer"},
-		{Name: "Админ", Email: &email2, Role: "admin"},
+		{Name: "Иван", Email: &email1, Password: string(pass1), Role: "customer"},
+		{Name: "Админ", Email: &email2, Password: string(pass2), Role: "admin"},
 	}
 
 	if err := db.Create(&users).Error; err != nil {
