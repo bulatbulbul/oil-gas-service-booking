@@ -2,6 +2,7 @@ package router
 
 import (
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"oil-gas-service-booking/internal/http-server/handlers"
 )
 
@@ -10,8 +11,13 @@ func NewRouter(
 	userHandler *handlers.UserHandler,
 	bookingHandler *handlers.BookingHandler,
 	serviceHandler *handlers.ServiceHandler,
+	businessHandler *handlers.BusinessHandler,
 ) *chi.Mux {
+
 	r := chi.NewRouter()
+
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
 	// Companies
 	r.Route("/companies", func(r chi.Router) {
@@ -20,6 +26,15 @@ func NewRouter(
 		r.Get("/{id}", companyHandler.GetByID)
 		r.Put("/{id}", companyHandler.Update)
 		r.Delete("/{id}", companyHandler.Delete)
+	})
+
+	// Services
+	r.Route("/services", func(r chi.Router) {
+		r.Post("/", serviceHandler.Create)
+		r.Get("/", serviceHandler.GetAll)
+		r.Get("/{id}", serviceHandler.GetByID)
+		r.Put("/{id}", serviceHandler.Update)
+		r.Delete("/{id}", serviceHandler.Delete)
 	})
 
 	// Users
@@ -38,18 +53,16 @@ func NewRouter(
 		r.Get("/{id}", bookingHandler.GetByID)
 		r.Put("/{id}", bookingHandler.Update)
 		r.Delete("/{id}", bookingHandler.Delete)
-
-		// Дополнительный эндпоинт для изменения статуса
-		r.Patch("/{id}/status", bookingHandler.UpdateStatus)
 	})
 
-	// Services
-	r.Route("/services", func(r chi.Router) {
-		r.Post("/", serviceHandler.Create)
-		r.Get("/", serviceHandler.GetAll)
-		r.Get("/{id}", serviceHandler.GetByID)
-		r.Put("/{id}", serviceHandler.Update)
-		r.Delete("/{id}", serviceHandler.Delete)
+	// Business logic endpoints
+	r.Route("/business", func(r chi.Router) {
+		r.Get("/companies-by-service/{service}", businessHandler.FindCompaniesByService)
+		r.Get("/users-with-active-bookings", businessHandler.FindUsersWithActiveBookings)
+		r.Get("/company-stats", businessHandler.GetCompanyStats)
+		r.Get("/popular-services", businessHandler.FindPopularServices)
+		r.Get("/search", businessHandler.SearchAll)
+		r.Get("/system-overview", businessHandler.GetSystemOverview)
 	})
 
 	return r

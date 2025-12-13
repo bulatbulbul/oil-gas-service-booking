@@ -36,3 +36,24 @@ func (r *BookingRepo) Update(b *models.Booking) error {
 func (r *BookingRepo) Delete(id int64) error {
 	return r.db.Delete(&models.Booking{}, id).Error
 }
+
+// GetByUserID - получить бронирования пользователя
+func (r *BookingRepo) GetByUserID(userID int64) ([]models.Booking, error) {
+	var bookings []models.Booking
+
+	err := r.db.
+		Where("user_id = ?", userID).
+		Preload("BookingServices.CompanyService.Company").
+		Preload("BookingServices.CompanyService.Service").
+		Find(&bookings).Error
+
+	return bookings, err
+}
+
+// UpdateStatus - обновить статус бронирования
+func (r *BookingRepo) UpdateStatus(bookingID int64, status string) error {
+	return r.db.
+		Model(&models.Booking{}).
+		Where("booking_id = ?", bookingID).
+		Update("status", status).Error
+}

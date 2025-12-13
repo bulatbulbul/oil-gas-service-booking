@@ -88,35 +88,6 @@ func (h *BookingHandler) Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(booking)
 }
 
-// PATCH /bookings/{id}/status - специальный эндпоинт для изменения статуса
-func (h *BookingHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-
-	booking, err := h.repo.GetByID(id)
-	if err != nil {
-		http.Error(w, "booking not found", http.StatusNotFound)
-		return
-	}
-
-	var input struct {
-		Status string `json:"status"`
-	}
-
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	booking.Status = input.Status
-
-	if err := h.repo.Update(booking); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	json.NewEncoder(w).Encode(booking)
-}
-
 // DELETE /bookings/{id}
 func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)

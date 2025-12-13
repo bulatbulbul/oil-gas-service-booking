@@ -18,14 +18,17 @@ func main() {
 	// Инициализируем базу данных
 	db, err := storage.NewGorm(cfg.Storage)
 	if err != nil {
-		log.Fatalf("storage error: %v", err)
+		log.Fatalf("Ошибка базы данных: %v", err)
 	}
 
 	// Инициализируем репозитории
 	companyRepo := repository.NewCompanyRepository(db)
 	userRepo := repository.NewUserRepo(db)
 	bookingRepo := repository.NewBookingRepo(db)
-	serviceRepo := repository.NewServiceRepo(db) // Нужно создать этот репозиторий
+	serviceRepo := repository.NewServiceRepo(db)
+
+	// Новый репозиторий для бизнес-логики
+	businessRepo := repository.NewBusinessRepo(db)
 
 	// Инициализируем хендлеры
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
@@ -33,14 +36,21 @@ func main() {
 	bookingHandler := handlers.NewBookingHandler(bookingRepo)
 	serviceHandler := handlers.NewServiceHandler(serviceRepo)
 
-	// Создаем роутер со всеми хендлерами
-	r := router.NewRouter(companyHandler, userHandler, bookingHandler, serviceHandler)
+	// Новый хендлер для бизнес-логики
+	businessHandler := handlers.NewBusinessHandler(businessRepo)
 
-	// Логируем запуск сервера
-	log.Printf("Server starting on %s", cfg.Address)
+	// Создаем роутер
+	r := router.NewRouter(
+		companyHandler,
+		userHandler,
+		bookingHandler,
+		serviceHandler,
+		businessHandler,
+	)
 
 	// Запускаем сервер
+	log.Printf("Сервер запущен на %s", cfg.Address)
 	if err := http.ListenAndServe(cfg.Address, r); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
+		log.Fatalf("Ошибка запуска сервера: %v", err)
 	}
 }
