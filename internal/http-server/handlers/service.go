@@ -9,7 +9,6 @@ import (
 	"oil-gas-service-booking/internal/models"
 )
 
-// Нужно создать репозиторий ServiceRepository
 type ServiceRepository interface {
 	Create(service *models.Service) error
 	GetAll() ([]models.Service, error)
@@ -26,24 +25,46 @@ func NewServiceHandler(repo ServiceRepository) *ServiceHandler {
 	return &ServiceHandler{repo: repo}
 }
 
-// Остальные методы аналогично CompanyHandler
-// POST /services
+// CreateService godoc
+// @Summary Создать услугу
+// @Tags services
+// @Security BasicAuth
+// @Accept json
+// @Produce json
+// @Param data body ServiceCreateRequest true "Данные услуги"
+// @Success 201 {object} models.Service
+// @Failure 400 {string} string
+// @Failure 401 {string} string
+// @Failure 403 {string} string
+// @Failure 500 {string} string
+// @Router /services [post]
 func (h *ServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var input models.Service
+	var input ServiceCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	if err := h.repo.Create(&input); err != nil {
+	service := models.Service{
+		Title: input.Title,
+	}
+
+	if err := h.repo.Create(&service); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	json.NewEncoder(w).Encode(input)
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(service)
 }
 
-// GET /services
+// GetServices godoc
+// @Summary Получить услуги
+// @Tags services
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /services [get]
 func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	services, err := h.repo.GetAll()
 	if err != nil {
@@ -54,7 +75,14 @@ func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(services)
 }
 
-// GET /services/{id}
+// GetService godoc
+// @Summary Получить услугу по ID
+// @Tags services
+// @Security BasicAuth
+// @Param id path int true "Service ID"
+// @Success 200
+// @Failure 401
+// @Router /services/{id} [get]
 func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
@@ -67,7 +95,15 @@ func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(service)
 }
 
-// PUT /services/{id}
+// UpdateService godoc
+// @Summary Обновить услугу
+// @Tags services
+// @Security BasicAuth
+// @Param id path int true "Service ID"
+// @Success 200
+// @Failure 401
+// @Failure 403
+// @Router /services/{id} [put]
 func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
@@ -90,7 +126,15 @@ func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(service)
 }
 
-// DELETE /services/{id}
+// DeleteService godoc
+// @Summary Удалить услугу
+// @Tags services
+// @Security BasicAuth
+// @Param id path int true "Service ID"
+// @Success 204
+// @Failure 401
+// @Failure 403
+// @Router /services/{id} [delete]
 func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 

@@ -18,7 +18,14 @@ func NewBusinessHandler(businessRepo *repository.BusinessRepo) *BusinessHandler 
 	return &BusinessHandler{businessRepo: businessRepo}
 }
 
-// GET /business/companies-by-service/{service}
+// CompaniesByService godoc
+// @Summary Поиск компании по услуге
+// @Tags business
+// @Security BasicAuth
+// @Param service path string true "Service name"
+// @Success 200
+// @Failure 401
+// @Router /business/companies-by-service/{service} [get]
 func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.Request) {
 	service := chi.URLParam(r, "service")
 
@@ -37,7 +44,13 @@ func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(companies)
 }
 
-// GET /business/users-with-active-bookings
+// UsersWithBookings godoc
+// @Summary Пользователи с активными бронированиями
+// @Tags business
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /business/users-with-active-bookings [get]
 func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *http.Request) {
 	users, err := h.businessRepo.FindUsersWithActiveBookings()
 	if err != nil {
@@ -49,7 +62,13 @@ func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(users)
 }
 
-// GET /business/company-stats
+// CompanyStats godoc
+// @Summary Статистика компаний
+// @Tags business
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /business/company-stats [get]
 func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request) {
 	// Параметры для фильтрации по дате
 	fromStr := r.URL.Query().Get("from")
@@ -88,7 +107,13 @@ func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(stats)
 }
 
-// GET /business/popular-services
+// PopularServices godoc
+// @Summary Популярные услуги
+// @Tags business
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /business/popular-services [get]
 func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Request) {
 	limit := 10
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -108,7 +133,14 @@ func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(services)
 }
 
-// GET /business/search
+// Search godoc
+// @Summary  Поиск (компании и услуги)
+// @Tags business
+// @Security BasicAuth
+// @Param q query string true "Search query"
+// @Success 200
+// @Failure 401
+// @Router /business/search [get]
 func (h *BusinessHandler) SearchAll(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {
@@ -124,45 +156,4 @@ func (h *BusinessHandler) SearchAll(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(results)
-}
-
-// GET /business/system-overview
-func (h *BusinessHandler) GetSystemOverview(w http.ResponseWriter, r *http.Request) {
-	// Используем несколько запросов для создания общего отчета
-
-	// 1. Популярные услуги
-	popularServices, err := h.businessRepo.FindPopularServices(5)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// 2. Пользователи с активными бронированиями
-	activeUsers, err := h.businessRepo.FindUsersWithActiveBookings()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// 3. Статистика за последний месяц
-	fromDate := time.Now().AddDate(0, -1, 0)
-	toDate := time.Now()
-	companyStats, err := h.businessRepo.GetCompanyStats(fromDate, toDate)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	response := map[string]interface{}{
-		"popular_services": popularServices,
-		"active_users":     activeUsers,
-		"company_stats":    companyStats,
-		"period": map[string]string{
-			"from": fromDate.Format("2006-01-02"),
-			"to":   toDate.Format("2006-01-02"),
-		},
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
 }

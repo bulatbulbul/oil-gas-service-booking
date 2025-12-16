@@ -11,6 +11,23 @@ import (
 	"oil-gas-service-booking/internal/models"
 )
 
+// Определяем типы для запросов и ответов
+type RegisterRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Role     string `json:"role"`
+}
+
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type TokenResponse struct {
+	Token string `json:"token"`
+}
+
 type AuthHandler struct {
 	db *gorm.DB
 }
@@ -19,15 +36,19 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{db: db}
 }
 
-// POST /auth/register
-// Body: { "name": "...", "email": "...", "password": "...", "role": "customer|admin" }
+// Register godoc
+// @Summary Регистрация пользователя
+// @Description Создание нового пользователя
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body RegisterRequest true "Данные пользователя"
+// @Success 201 {object} models.User
+// @Failure 400 {string} string
+// @Failure 500 {string} string
+// @Router /auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	var in struct {
-		Name     string `json:"name"`
-		Email    string `json:"email"`
-		Password string `json:"password"`
-		Role     string `json:"role"`
-	}
+	var in RegisterRequest // Используем определенный тип
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -75,14 +96,18 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-// POST /auth/login
-// Body: { "email": "...", "password": "..." }
-// Response: { "token": "<base64(email:password)>" }
+// Login godoc
+// @Summary Авторизация
+// @Description Вход по email и паролю. Возвращает Basic token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param data body LoginRequest true "Email и пароль"
+// @Success 200 {object} TokenResponse
+// @Failure 401 {string} string
+// @Router /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var in struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var in LoginRequest // Используем определенный тип
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -104,13 +129,10 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Возвращаем Basic token, который клиент может вставлять в заголовок:
-	// Authorization: Basic <base64(email:password)>
 	token := base64.StdEncoding.EncodeToString([]byte(in.Email + ":" + in.Password))
-	json.NewEncoder(w).Encode(map[string]string{"token": token})
+	json.NewEncoder(w).Encode(TokenResponse{Token: token})
 }
 
-// Вспомогательная функция — декодирование токена "Basic <b64>"
 func DecodeBasicToken(header string) (email, password string, ok bool) {
 	if header == "" || !strings.HasPrefix(header, "Basic ") {
 		return "", "", false

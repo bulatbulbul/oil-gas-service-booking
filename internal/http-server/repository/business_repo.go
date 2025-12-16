@@ -16,7 +16,7 @@ func NewBusinessRepo(db *gorm.DB) *BusinessRepo {
 	return &BusinessRepo{db: db}
 }
 
-// Вспомогательные функции для работы с коллекциями (аналог LINQ)
+// Вспомогательные функции аналог LINQ
 func Where[T any](collection []T, predicate func(T) bool) []T {
 	var result []T
 	for _, item := range collection {
@@ -207,7 +207,6 @@ func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) 
 		}
 	})
 
-	// Сортируем по количеству бронирований (по убыванию)
 	for i := 0; i < len(serviceStats); i++ {
 		for j := i + 1; j < len(serviceStats); j++ {
 			if serviceStats[j].BookingCount > serviceStats[i].BookingCount {
@@ -216,7 +215,6 @@ func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) 
 		}
 	}
 
-	// Ограничиваем результат
 	if limit > 0 && limit < len(serviceStats) {
 		serviceStats = serviceStats[:limit]
 	}

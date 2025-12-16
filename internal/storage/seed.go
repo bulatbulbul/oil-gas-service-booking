@@ -12,7 +12,6 @@ func hashPassword(pw string) string {
 	return string(hash)
 }
 
-// Seed наполняет БД тестовыми данными
 func Seed(db *gorm.DB) error {
 	var count int64
 	db.Model(&models.Company{}).Count(&count)
@@ -54,7 +53,6 @@ func Seed(db *gorm.DB) error {
 		return err
 	}
 
-	// Users с хешированными паролями
 	pass1, _ := bcrypt.GenerateFromPassword([]byte("user123"), bcrypt.DefaultCost)
 	pass2, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
 

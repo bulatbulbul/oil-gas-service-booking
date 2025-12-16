@@ -21,7 +21,6 @@ const (
 
 // BasicAuthMiddleware проверяет заголовок Authorization (Basic) и
 // при успешной проверке добавляет в контекст user_id и role.
-// Если adminOnly == true — требует роль "admin".
 func BasicAuthMiddleware(db *gorm.DB, adminOnly bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -52,19 +51,16 @@ func BasicAuthMiddleware(db *gorm.DB, adminOnly bool) func(http.Handler) http.Ha
 				return
 			}
 
-			// сравниваем хешированный пароль
 			if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password)); err != nil {
 				http.Error(w, "invalid credentials", http.StatusUnauthorized)
 				return
 			}
 
-			// проверка роли
 			if adminOnly && user.Role != "admin" {
 				http.Error(w, "forbidden", http.StatusForbidden)
 				return
 			}
 
-			// помещаем user info в контекст
 			ctx := context.WithValue(r.Context(), ctxUserIDKey, user.UserID)
 			ctx = context.WithValue(ctx, ctxRoleKey, user.Role)
 
