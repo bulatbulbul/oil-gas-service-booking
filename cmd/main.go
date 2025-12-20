@@ -37,6 +37,8 @@ func main() {
 	bookingRepo := repository.NewBookingRepo(db)
 	serviceRepo := repository.NewServiceRepo(db)
 	businessRepo := repository.NewBusinessRepo(db)
+	bookingServiceRepo := repository.NewBookingServiceRepo(db)
+	companyServiceRepo := repository.NewCompanyServiceRepo(db)
 
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
@@ -44,6 +46,8 @@ func main() {
 	serviceHandler := handlers.NewServiceHandler(serviceRepo)
 	businessHandler := handlers.NewBusinessHandler(businessRepo)
 	authHandler := handlers.NewAuthHandler(db)
+	bookingServiceHandler := handlers.NewBookingServiceHandler(bookingServiceRepo)
+	companyServiceHandler := handlers.NewCompanyServiceHandler(companyServiceRepo)
 
 	r := router.NewRouter(
 		db,
@@ -53,6 +57,8 @@ func main() {
 		serviceHandler,
 		businessHandler,
 		authHandler,
+		bookingServiceHandler,
+		companyServiceHandler,
 	)
 
 	host := cfg.HTTPServer.Address

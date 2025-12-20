@@ -11,7 +11,6 @@ import (
 	"oil-gas-service-booking/internal/models"
 )
 
-// Определяем типы для запросов и ответов
 type RegisterRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`

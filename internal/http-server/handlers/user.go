@@ -39,10 +39,17 @@ func (h *UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Хешируем пароль перед сохранением
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
 	user := models.User{
 		Name:     input.Name,
 		Email:    &input.Email,
-		Password: input.Password,
+		Password: string(hashedPassword),
 		Role:     input.Role,
 	}
 

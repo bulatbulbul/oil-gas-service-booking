@@ -17,6 +17,8 @@ func NewRouter(
 	serviceHandler *handlers.ServiceHandler,
 	businessHandler *handlers.BusinessHandler,
 	authHandler *handlers.AuthHandler,
+	bookingServiceHandler *handlers.BookingServiceHandler, // Добавлено
+	companyServiceHandler *handlers.CompanyServiceHandler, // Добавлено
 ) *chi.Mux {
 
 	r := chi.NewRouter()
@@ -35,6 +37,9 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(db, false)).Get("/{id}", companyHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Put("/{id}", companyHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Delete("/{id}", companyHandler.Delete)
+
+		// Вложенный маршрут для получения услуг компании
+		r.With(authmw.BasicAuthMiddleware(db, false)).Get("/{company_id}/services", companyServiceHandler.GetByCompanyID)
 	})
 
 	r.Route("/services", func(r chi.Router) {
@@ -43,6 +48,9 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(db, false)).Get("/{id}", serviceHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Put("/{id}", serviceHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Delete("/{id}", serviceHandler.Delete)
+
+		// Вложенный маршрут для получения компаний, предоставляющих услугу
+		r.With(authmw.BasicAuthMiddleware(db, false)).Get("/{service_id}/companies", companyServiceHandler.GetByServiceID)
 	})
 
 	r.Route("/users", func(r chi.Router) {
@@ -54,11 +62,32 @@ func NewRouter(
 	})
 
 	r.Route("/bookings", func(r chi.Router) {
-		r.With(authmw.BasicAuthMiddleware(db, true)).Post("/", bookingHandler.Create)
+		r.With(authmw.BasicAuthMiddleware(db, false)).Post("/", bookingHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Get("/", bookingHandler.GetAll)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Get("/{id}", bookingHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Put("/{id}", bookingHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Delete("/{id}", bookingHandler.Delete)
+
+		// Вложенный маршрут для получения услуг бронирования
+		r.With(authmw.BasicAuthMiddleware(db, true)).Get("/{booking_id}/services", bookingServiceHandler.GetByBookingID)
+	})
+
+	r.Route("/booking-services", func(r chi.Router) {
+		r.Use(authmw.BasicAuthMiddleware(db, true))
+		r.Post("/", bookingServiceHandler.Create)
+		r.Get("/", bookingServiceHandler.GetAll)
+		r.Get("/{id}", bookingServiceHandler.GetByID)
+		r.Put("/{id}", bookingServiceHandler.Update)
+		r.Delete("/{id}", bookingServiceHandler.Delete)
+	})
+
+	r.Route("/company-services", func(r chi.Router) {
+		r.Use(authmw.BasicAuthMiddleware(db, true))
+		r.Post("/", companyServiceHandler.Create)
+		r.Get("/", companyServiceHandler.GetAll)
+		r.Get("/{id}", companyServiceHandler.GetByID)
+		r.Put("/{id}", companyServiceHandler.Update)
+		r.Delete("/{id}", companyServiceHandler.Delete)
 	})
 
 	r.Route("/business", func(r chi.Router) {

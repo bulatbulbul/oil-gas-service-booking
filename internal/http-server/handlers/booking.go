@@ -19,18 +19,18 @@ func NewBookingHandler(repo *repository.BookingRepo) *BookingHandler {
 	return &BookingHandler{repo: repo}
 }
 
-// CreateBookingRequest - запрос на создание бронирования
-type CreateBookingRequest struct {
-	Description *string                       `json:"description,omitempty"`
-	Status      string                        `json:"status,omitempty"`
-	UserID      *int64                        `json:"user_id,omitempty"` // Только для админов
-	Services    []BookingServiceCreateRequest `json:"services,omitempty"`
-}
-
-// BookingServiceCreateRequest - запрос на добавление услуги в бронирование
-type BookingServiceCreateRequest struct {
+// BookingServiceItemRequest - запрос на добавление услуги в бронирование
+type BookingServiceItemRequest struct {
 	CompanyServiceID int64   `json:"company_service_id"`
 	Notes            *string `json:"notes,omitempty"`
+}
+
+// CreateBookingRequest - запрос на создание бронирования
+type CreateBookingRequest struct {
+	Description *string                     `json:"description,omitempty"`
+	Status      string                      `json:"status,omitempty"`
+	UserID      *int64                      `json:"user_id,omitempty"` // Только для админов
+	Services    []BookingServiceItemRequest `json:"services,omitempty"`
 }
 
 // CreateBooking godoc
