@@ -3,6 +3,7 @@ package router
 import (
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"gorm.io/gorm"
 
 	"oil-gas-service-booking/internal/http-server/handlers"
@@ -25,6 +26,15 @@ func NewRouter(
 
 	r.Use(chiMiddleware.Logger)
 	r.Use(chiMiddleware.Recoverer)
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300,
+	}))
 
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
@@ -68,7 +78,9 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(db, true)).Put("/{id}", bookingHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(db, true)).Delete("/{id}", bookingHandler.Delete)
 
-		// Вложенный маршрут для получения услуг бронирования
+		// новое:
+		r.With(authmw.BasicAuthMiddleware(db, false)).Get("/me", bookingHandler.GetMyBookings)
+
 		r.With(authmw.BasicAuthMiddleware(db, true)).Get("/{booking_id}/services", bookingServiceHandler.GetByBookingID)
 	})
 

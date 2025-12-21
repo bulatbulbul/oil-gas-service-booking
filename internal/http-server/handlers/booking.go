@@ -104,6 +104,29 @@ func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bookings)
 }
 
+// GetMyBookings godoc
+// @Summary Получить бронирования текущего пользователя
+// @Tags bookings
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /bookings/me [get]
+func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
+	userID, _, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "user not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	bookings, err := h.repo.GetByUserID(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(bookings)
+}
+
 // GetBooking godoc
 // @Summary Получить бронирование
 // @Tags bookings
