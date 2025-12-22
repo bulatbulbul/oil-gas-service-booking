@@ -1,0 +1,1399 @@
+basePath: /
+definitions:
+  internal_http-server_handlers.BookingCreateRequest:
+    properties:
+      description:
+        type: string
+      status:
+        example: requested
+        type: string
+      user_id:
+        type: integer
+    type: object
+  internal_http-server_handlers.BookingServiceRequest:
+    properties:
+      booking_id:
+        type: integer
+      company_service_id:
+        type: integer
+      notes:
+        type: string
+    type: object
+  internal_http-server_handlers.CompanyServiceCreateRequest:
+    properties:
+      company_id:
+        type: integer
+      service_id:
+        type: integer
+    type: object
+  internal_http-server_handlers.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  internal_http-server_handlers.RegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
+  internal_http-server_handlers.ServiceCreateRequest:
+    properties:
+      title:
+        example: Диагностика оборудования
+        type: string
+    type: object
+  internal_http-server_handlers.TokenResponse:
+    properties:
+      role:
+        type: string
+      token:
+        type: string
+      user:
+        properties:
+          email:
+            type: string
+          id:
+            type: integer
+          role:
+            type: string
+        type: object
+    type: object
+  internal_http-server_handlers.UserCreateRequest:
+    properties:
+      email:
+        example: ivan@example.com
+        type: string
+      name:
+        example: Иван
+        type: string
+      password:
+        example: "123456"
+        type: string
+      role:
+        example: customer
+        type: string
+    type: object
+  oil-gas-service-booking_internal_models.Booking:
+    properties:
+      bookingID:
+        type: integer
+      bookingServices:
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      status:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.User'
+      userID:
+        type: integer
+    type: object
+  oil-gas-service-booking_internal_models.BookingService:
+    properties:
+      booking:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.Booking'
+      bookingID:
+        type: integer
+      bookingServiceID:
+        type: integer
+      companyService:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+      companyServiceID:
+        type: integer
+      createdAt:
+        type: string
+      notes:
+        type: string
+      quantity:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  oil-gas-service-booking_internal_models.Company:
+    properties:
+      address:
+        type: string
+      companyID:
+        type: integer
+      companyServices:
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      name:
+        type: string
+      updatedAt:
+        type: string
+      user:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.User'
+      userID:
+        description: владелец
+        type: integer
+    type: object
+  oil-gas-service-booking_internal_models.CompanyService:
+    properties:
+      bookingServices:
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+        type: array
+      company:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+      companyID:
+        type: integer
+      companyServiceID:
+        type: integer
+      createdAt:
+        type: string
+      price:
+        description: цена конкретной услуги у компании
+        type: number
+      service:
+        $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+      serviceID:
+        type: integer
+      updatedAt:
+        type: string
+    type: object
+  oil-gas-service-booking_internal_models.Service:
+    properties:
+      companyServices:
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+        type: array
+      createdAt:
+        type: string
+      description:
+        type: string
+      price:
+        type: number
+      serviceID:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  oil-gas-service-booking_internal_models.User:
+    properties:
+      bookings:
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.Booking'
+        type: array
+      companies:
+        description: Добавляем обратную связь
+        items:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+        type: array
+      createdAt:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+      updatedAt:
+        type: string
+      userID:
+        type: integer
+    type: object
+host: localhost:8082
+info:
+  contact: {}
+  title: Oil & Gas Service Booking API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Вход по email и паролю. Возвращает JWT токен
+      parameters:
+      - description: Email и пароль
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/internal_http-server_handlers.TokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      summary: Авторизация
+      tags:
+      - auth
+  /auth/me:
+    get:
+      description: Возвращает данные текущего пользователя по JWT
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Текущий пользователь
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Создание нового пользователя
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/internal_http-server_handlers.TokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /booking-services:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить все услуги в бронированиях
+      tags:
+      - booking-services
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные услуги в бронировании
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.BookingServiceRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Создать услугу в бронировании
+      tags:
+      - booking-services
+  /booking-services/{id}:
+    delete:
+      parameters:
+      - description: BookingService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Удалить услугу из бронирования
+      tags:
+      - booking-services
+    get:
+      parameters:
+      - description: BookingService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить услугу в бронировании по ID
+      tags:
+      - booking-services
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: BookingService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Обновить услугу в бронировании
+      tags:
+      - booking-services
+  /bookings:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить бронирования
+      tags:
+      - bookings
+    post:
+      consumes:
+      - application/json
+      description: Создание нового бронирования
+      parameters:
+      - description: Данные бронирования
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.BookingCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Booking'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Создать бронирование
+      tags:
+      - bookings
+  /bookings/{booking_id}/services:
+    get:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: booking_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.BookingService'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить услуги по ID бронирования
+      tags:
+      - booking-services
+  /bookings/{id}:
+    delete:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+      security:
+      - BasicAuth: []
+      summary: Удалить бронирование
+      tags:
+      - bookings
+    get:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить бронирование
+      tags:
+      - bookings
+    put:
+      parameters:
+      - description: Booking ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+      security:
+      - BasicAuth: []
+      summary: Обновить бронирование
+      tags:
+      - bookings
+  /bookings/me:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить бронирования текущего пользователя
+      tags:
+      - bookings
+  /business/companies-by-service/{service}:
+    get:
+      parameters:
+      - description: Service name
+        in: path
+        name: service
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Поиск компании по услуге
+      tags:
+      - business
+  /business/company-stats:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Статистика компаний
+      tags:
+      - business
+  /business/popular-services:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Популярные услуги
+      tags:
+      - business
+  /business/search:
+    get:
+      parameters:
+      - description: Search query
+        in: query
+        name: q
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Поиск (компании и услуги)
+      tags:
+      - business
+  /business/users-with-active-bookings:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Пользователи с активными бронированиями
+      tags:
+      - business
+  /companies:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Get all companies
+      tags:
+      - companies
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Company data
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Create company
+      tags:
+      - companies
+  /companies/{company_id}/services:
+    get:
+      parameters:
+      - description: Company ID
+        in: path
+        name: company_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить услуги компании
+      tags:
+      - company-services
+  /companies/{id}:
+    delete:
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Delete company
+      tags:
+      - companies
+    get:
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Get company by ID
+      tags:
+      - companies
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Company ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Company
+        in: body
+        name: company
+        required: true
+        schema:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Update company
+      tags:
+      - companies
+  /companies/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.Company'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Get my companies
+      tags:
+      - companies
+  /company-services:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить все связи компаний и услуг
+      tags:
+      - company-services
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные связи компании и услуги
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.CompanyServiceCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Создать связь компании и услуги
+      tags:
+      - company-services
+  /company-services/{id}:
+    delete:
+      parameters:
+      - description: CompanyService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Удалить связь компании и услуги
+      tags:
+      - company-services
+    get:
+      parameters:
+      - description: CompanyService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить связь компании и услуги по ID
+      tags:
+      - company-services
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: CompanyService ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Обновить связь компании и услуги
+      tags:
+      - company-services
+  /company-services/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить связи услуг только моих компаний
+      tags:
+      - company-services
+  /services:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+            type: array
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить все услуги
+      tags:
+      - services
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные услуги
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.ServiceCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Создать услугу
+      tags:
+      - services
+  /services/{id}:
+    delete:
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+      security:
+      - BasicAuth: []
+      summary: Удалить услугу
+      tags:
+      - services
+    get:
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+      security:
+      - BasicAuth: []
+      summary: Получить услугу по ID
+      tags:
+      - services
+    put:
+      parameters:
+      - description: Service ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Not Found
+      security:
+      - BasicAuth: []
+      summary: Обновить услугу
+      tags:
+      - services
+  /services/{service_id}/companies:
+    get:
+      parameters:
+      - description: Service ID
+        in: path
+        name: service_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.CompanyService'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить компании, предоставляющие услугу
+      tags:
+      - company-services
+  /services/my:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/oil-gas-service-booking_internal_models.Service'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Получить услуги моих компаний
+      tags:
+      - services
+  /users:
+    get:
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить пользователей
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: data
+        required: true
+        schema:
+          $ref: '#/definitions/internal_http-server_handlers.UserCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/oil-gas-service-booking_internal_models.User'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      security:
+      - BasicAuth: []
+      summary: Создать пользователя
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+      security:
+      - BasicAuth: []
+      summary: Удалить пользователя
+      tags:
+      - users
+    get:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+      security:
+      - BasicAuth: []
+      summary: Получить пользователя по ID
+      tags:
+      - users
+    put:
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+      security:
+      - BasicAuth: []
+      summary: Обновить пользователя
+      tags:
+      - users
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"
