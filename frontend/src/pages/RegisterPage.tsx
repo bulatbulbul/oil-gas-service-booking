@@ -1,88 +1,110 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { api } from "../api";
 
 function RegisterPage() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("customer");
-    const [status, setStatus] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
-
+    const [status, setStatus] = useState<string | null>(null);
     const navigate = useNavigate();
 
-    async function handleRegister(e: React.FormEvent) {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        setStatus(null);
+        if (!name.trim() || !email.trim() || !password.trim()) {
+            setStatus("Заполните все поля");
+            return;
+        }
 
         try {
             setLoading(true);
-            await api.post("/auth/register", {
-                name,
-                email,
-                password,
-                role,
+            setStatus(null);
+
+            const res = await api.post("/auth/register", {
+                name: name.trim(),
+                email: email.trim(),
+                password: password.trim(),
             });
-            setStatus("Регистрация успешна. Теперь можно войти.");
-            // опционально сразу перейти на /login
-            navigate("/login");
+
+            const token = res.data.token;
+            const userRole = res.data.role;
+
+            localStorage.setItem("authToken", token);
+            localStorage.setItem("userRole", userRole);
+
+            setStatus("Регистрация успешна! Перенаправление...");
+            setTimeout(() => navigate("/search"), 1500);
         } catch (err: any) {
-            console.log("REGISTER ERROR", err.response?.status, err.response?.data);
-            setStatus(err.response?.data || "Ошибка регистрации");
+            console.log("REGISTER ERROR", err.response?.data);
+            setStatus(err.response?.data?.error || "Ошибка регистрации");
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div style={{ maxWidth: 400, margin: "40px auto" }}>
-            <h1>Регистрация</h1>
-            <form onSubmit={handleRegister}>
-                <div>
-                    <label>Имя</label>
-                    <input
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                    />
+        <div className="auth-page">
+            <div className="auth-container">
+                <div className="auth-card">
+                    <div className="auth-header">
+                        <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
+                            <circle cx="50" cy="50" r="45" fill="#28a745" stroke="white" strokeWidth="3"/>
+                            <text x="50" y="58" textAnchor="middle" fill="white" fontSize="24" fontWeight="bold">OG</text>
+                        </svg>
+                        <h1>OilGas Booking</h1>
+                        <p>Создать аккаунт</p>
+                    </div>
+
+                    <form onSubmit={handleSubmit} className="auth-form">
+                        <div className="form-group">
+                            <label>Имя</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Ваше имя"
+                                disabled={loading}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="your@email.com"
+                                disabled={loading}
+                                required
+                            />
+                        </div>
+
+                        <div className="form-group">
+                            <label>Пароль</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="••••••••"
+                                disabled={loading}
+                                required
+                            />
+                        </div>
+
+                        {status && <div className={`message ${status.includes("Ошибка") ? "error-message" : "success-message"}`}>{status}</div>}
+
+                        <button type="submit" disabled={loading} className="submit-btn">
+                            {loading ? "Регистрация..." : "Зарегистрироваться"}
+                        </button>
+                    </form>
+
+                    <div className="auth-footer">
+                        <p>Уже есть аккаунт? <Link to="/login">Войти</Link></p>
+                    </div>
                 </div>
-
-                <div style={{ marginTop: 8 }}>
-                    <label>Email</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div style={{ marginTop: 8 }}>
-                    <label>Пароль</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <div style={{ marginTop: 8 }}>
-                    <label>Роль</label>
-                    <select value={role} onChange={(e) => setRole(e.target.value)}>
-                        <option value="customer">customer</option>
-                        <option value="admin">admin</option>
-                    </select>
-                </div>
-
-                <button type="submit" disabled={loading} style={{ marginTop: 12 }}>
-                    Зарегистрироваться
-                </button>
-            </form>
-
-            {status && <p style={{ marginTop: 10 }}>{status}</p>}
+            </div>
         </div>
     );
 }
