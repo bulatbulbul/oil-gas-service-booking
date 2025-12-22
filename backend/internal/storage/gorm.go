@@ -3,7 +3,6 @@ package storage
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	_ "modernc.org/sqlite"
@@ -53,6 +52,5 @@ func NewGorm(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("seed data: %w", err)
 	}
 
-	log.Println("✅ База данных готова (миграции + seed)")
 	return gormDB, nil
 }

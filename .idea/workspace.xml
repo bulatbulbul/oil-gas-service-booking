@@ -4,85 +4,55 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29fec1b5-4d72-4192-aa61-aec689d569f3" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/frontend/src/components/AdminRoute.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminAnalyticsPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUserBookingsPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUsersPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/HomePage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/MyServicesPage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/ProfilePage.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/frontend/src/pages/SearchServicesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/local.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/PrivateRoute.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/PrivateRoute.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/CompaniesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/CompaniesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/MyBookingsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MyBookingsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/NewBookingPage.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/config/config.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/auth.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/booking.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/booking_service.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/business.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/company.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/company_service.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/dto.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/service.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/handlers/user.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/middleware/auth.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/booking_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/booking_service_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/business_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/company_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/company_service_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/service_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/repository/user_repo.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/http-server/router/router.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/models/models.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/storage/gorm.go" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/internal/storage/seed.go" beforeDir="false" />
+    <list default="true" id="29fec1b5-4d72-4192-aa61-aec689d569f3" name="Changes" comment="fixed the errors">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/release-backend.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/release-backend.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/storage/gorm.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/storage/gorm.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/storage/seed.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/storage/seed.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/SearchServicesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SearchServicesPage.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="directory" />
+    </option>
+  </component>
   <component name="GOROOT" url="file://$USER_HOME$/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.7.windows-amd64" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 5
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 5
+}</component>
   <component name="ProjectId" id="37CpLPjGGpNBwuUIGXSTChZcl8t" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.go.formatter.settings.were.checked": "true",
-    "RunOnceActivity.go.migrated.go.modules.settings": "true",
-    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
-    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
-    "git-widget-placeholder": "main",
-    "go.import.settings.migrated": "true",
-    "go.sdk.automatically.set": "true",
-    "last_opened_file_path": "C:/Users/Bulat",
-    "node.js.detected.package.eslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/Bulat&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\Bulat\\Desktop\\study\\GO\\oil-gas-service-booking\\frontend\\node_modules\\typescript\\lib&quot;
   }
-}]]></component>
+}</component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -94,6 +64,11 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="completed the base frontend and backend" />
+    <MESSAGE value="fixed the errors" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed the errors" />
   </component>
   <component name="VgoProject">
     <settings-migrated>true</settings-migrated>

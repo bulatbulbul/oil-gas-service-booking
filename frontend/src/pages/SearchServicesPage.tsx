@@ -12,10 +12,6 @@ type CompanyServiceResult = {
     CompanyServiceID: number;
 };
 
-type CreatedBooking = {
-    BookingID: number;
-    Status: string;
-};
 
 function SearchServicesPage() {
     const [query, setQuery] = useState("");

@@ -15,7 +15,6 @@ func Seed(db *gorm.DB) error {
 	var count int64
 	db.Model(&models.Company{}).Count(&count)
 	if count > 0 {
-		fmt.Println("База уже содержит данные, пропускаем seed")
 		return nil
 	}
 
@@ -71,7 +70,6 @@ func Seed(db *gorm.DB) error {
 			return fmt.Errorf("ошибка создания пользователя: %w", err)
 		}
 	}
-	fmt.Printf("✅ Создано %d пользователей\n", len(users))
 
 	userIDByEmail := map[string]int64{}
 	for _, u := range users {
@@ -123,7 +121,6 @@ func Seed(db *gorm.DB) error {
 			return fmt.Errorf("ошибка создания услуги: %w", err)
 		}
 	}
-	fmt.Printf("✅ Создано %d услуг\n", len(services))
 
 	type companySeed struct {
 		OwnerEmail string
@@ -184,7 +181,6 @@ func Seed(db *gorm.DB) error {
 			return fmt.Errorf("ошибка создания компании: %w", err)
 		}
 	}
-	fmt.Printf("✅ Создано %d компаний\n", len(companies))
 
 	rnd := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -221,7 +217,6 @@ func Seed(db *gorm.DB) error {
 		}
 		totalLinks += n
 	}
-	fmt.Printf("✅ Создано ~%d связей компаний и услуг\n", totalLinks)
 
 	bookings := []models.Booking{
 		{
@@ -246,7 +241,6 @@ func Seed(db *gorm.DB) error {
 			return fmt.Errorf("ошибка создания бронирования: %w", err)
 		}
 	}
-	fmt.Printf("Создано %d бронирований\n", len(bookings))
 
 	return nil
 }
