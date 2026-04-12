@@ -1,375 +1,178 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useState } from "react";
+import { useMyServices } from "../hooks/useMyServices";
 
-type Company = {
-    CompanyID: number;
-    Name: string;
+const pageStyle: React.CSSProperties = { maxWidth: 960, margin: "0 auto", padding: "48px 32px" };
+const inputStyle: React.CSSProperties = {
+    padding: "10px 14px",
+    border: "1px solid #e8e8e8",
+    borderRadius: 2,
+    fontSize: 13,
+    fontFamily: "inherit",
+    outline: "none",
 };
-
-type Service = {
-    ServiceID: number;
-    Title: string;
+const btnPrimary: React.CSSProperties = {
+    padding: "10px 20px",
+    background: "#000",
+    color: "#fff",
+    border: "none",
+    borderRadius: 2,
+    fontSize: 13,
+    fontWeight: 600,
+    cursor: "pointer",
+    fontFamily: "inherit",
+    flexShrink: 0,
 };
-
-type CompanyService = {
-    CompanyServiceID: number;
-    CompanyID: number;
-    ServiceID: number;
-    Company?: Company;
-    Service?: Service;
+const btnOutline: React.CSSProperties = {
+    padding: "5px 12px",
+    background: "#fff",
+    color: "#000",
+    border: "1px solid #e8e8e8",
+    borderRadius: 2,
+    fontSize: 12,
+    fontWeight: 500,
+    cursor: "pointer",
+    fontFamily: "inherit",
 };
 
 function MyServicesPage() {
-    const [items, setItems] = useState<CompanyService[]>([]);
-    const [companies, setCompanies] = useState<Company[]>([]);
-
+    const { items, companies, loading, error, creating, handleCreate, handleUpdateService, handleDelete } = useMyServices();
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | "">("");
     const [newServiceTitle, setNewServiceTitle] = useState("");
-
-    const [editingCompanyServiceId, setEditingCompanyServiceId] =
-        useState<number | null>(null);
+    const [editingId, setEditingId] = useState<number | null>(null);
     const [editingServiceId, setEditingServiceId] = useState<number | null>(null);
     const [editingTitle, setEditingTitle] = useState("");
 
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [creating, setCreating] = useState(false);
-
-    async function loadAll() {
-        try {
-            setLoading(true);
-            setError(null);
-
-            const [myRes, compRes] = await Promise.all([
-                api.get("/company-services/my"),
-                api.get("/companies/my"),
-            ]);
-
-            const myData = Array.isArray(myRes.data) ? myRes.data : [];
-            const compData = Array.isArray(compRes.data) ? compRes.data : [];
-
-            console.log("MY SERVICES RAW", myData);
-            console.log("MY COMPANIES RAW", compData);
-
-            setItems(myData);
-            setCompanies(compData);
-        } catch (err: any) {
-            console.log("MY SERVICES ERROR", err.response?.status, err.response?.data);
-            setError("Не удалось загрузить ваши услуги");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        loadAll();
-    }, []);
-
-    async function handleCreate(e: React.FormEvent) {
+    function onSubmitCreate(e: React.FormEvent) {
         e.preventDefault();
-        if (selectedCompanyId === "" || !newServiceTitle.trim()) return;
-
-        try {
-            setCreating(true);
-
-            const svcRes = await api.post("/services", {
-                title: newServiceTitle.trim(),
-            });
-            const createdService: Service = svcRes.data;
-
-            await api.post("/company-services", {
-                company_id: selectedCompanyId,
-                service_id: createdService.ServiceID,
-            });
-
+        if (selectedCompanyId === "") return;
+        handleCreate(selectedCompanyId, newServiceTitle).then(() => {
             setNewServiceTitle("");
             setSelectedCompanyId("");
-            await loadAll();
-        } catch (err: any) {
-            console.log("CREATE MY SERVICE ERROR", err.response?.status, err.response?.data);
-            alert("Не удалось добавить услугу компании");
-        } finally {
-            setCreating(false);
-        }
+        });
     }
 
-    function startEdit(cs: CompanyService) {
-        setEditingCompanyServiceId(cs.CompanyServiceID);
-        setEditingServiceId(cs.ServiceID);
-        setEditingTitle(cs.Service?.Title || "");
+    async function onSaveEdit() {
+        if (editingServiceId == null) return;
+        await handleUpdateService(editingServiceId, editingTitle);
+        setEditingId(null);
     }
 
-    function cancelEdit() {
-        setEditingCompanyServiceId(null);
-        setEditingServiceId(null);
-        setEditingTitle("");
-    }
-
-    async function saveEdit() {
-        if (editingCompanyServiceId == null || editingServiceId == null) return;
-        if (!editingTitle.trim()) return;
-
-        try {
-            await api.put(`/services/${editingServiceId}`, {
-                title: editingTitle.trim(),
-            });
-            cancelEdit();
-            await loadAll();
-        } catch (err: any) {
-            console.log("UPDATE SERVICE ERROR", err.response?.status, err.response?.data);
-            alert("Не удалось переименовать услугу");
-        }
-    }
-
-    async function handleDeleteBinding(companyServiceId: number) {
-        if (!confirm("Удалить услугу у компании?")) return;
-
-        try {
-            await api.delete(`/company-services/${companyServiceId}`);
-            await loadAll();
-        } catch (err: any) {
-            console.log("DELETE COMPANY SERVICE ERROR", err.response?.status, err.response?.data);
-            alert("Не удалось удалить услугу компании");
-        }
-    }
-
-    if (loading) return <div style={{ padding: 20 }}>Загрузка...</div>;
-    if (error) return <div style={{ padding: 20, color: "red" }}>{error}</div>;
+    if (loading) return <div style={pageStyle}><span style={{ color: "#999", fontSize: 14 }}>Загрузка...</span></div>;
+    if (error) return <div style={pageStyle}><span style={{ fontSize: 14 }}>{error}</span></div>;
 
     return (
-        <div
-            style={{
-                minHeight: "calc(100vh - 160px)",
-                display: "flex",
-                justifyContent: "center",
-                padding: "32px 16px",
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: 900,
-                    width: "100%",
-                    background: "white",
-                    borderRadius: 16,
-                    padding: 24,
-                    boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
-                }}
-            >
-                <h2
-                    style={{
-                        fontSize: 22,
-                        fontWeight: 600,
-                        marginBottom: 8,
-                        color: "#111827",
-                    }}
-                >
-                    Мои услуги
-                </h2>
+        <div style={pageStyle}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
+                Мои услуги
+            </h1>
+            <p style={{ fontSize: 13, color: "#666", marginBottom: 36 }}>
+                {items.length} {items.length === 1 ? "услуга" : "услуг"} у ваших компаний
+            </p>
 
-                <form
-                    onSubmit={handleCreate}
-                    style={{
-                        marginBottom: 20,
-                        display: "flex",
-                        gap: 8,
-                        flexWrap: "wrap",
-                    }}
+            <form onSubmit={onSubmitCreate} style={{ display: "flex", gap: 8, marginBottom: 40, flexWrap: "wrap" }}>
+                <select
+                    value={selectedCompanyId}
+                    onChange={(e) => setSelectedCompanyId(e.target.value ? Number(e.target.value) : "")}
+                    style={{ ...inputStyle, minWidth: 200 }}
                 >
-                    <select
-                        value={selectedCompanyId}
-                        onChange={(e) =>
-                            setSelectedCompanyId(e.target.value ? Number(e.target.value) : "")
-                        }
+                    <option value="">Выберите компанию</option>
+                    {companies.map((c) => (
+                        <option key={c.CompanyID} value={c.CompanyID}>{c.Name}</option>
+                    ))}
+                </select>
+                <input
+                    value={newServiceTitle}
+                    onChange={(e) => setNewServiceTitle(e.target.value)}
+                    placeholder="Название услуги"
+                    style={{ ...inputStyle, flex: 1, minWidth: 200 }}
+                />
+                <button type="submit" disabled={creating} style={{ ...btnPrimary, opacity: creating ? 0.5 : 1 }}>
+                    {creating ? "Добавление..." : "Добавить"}
+                </button>
+            </form>
+
+            {items.length === 0 ? (
+                <p style={{ fontSize: 14, color: "#999" }}>У ваших компаний нет привязанных услуг.</p>
+            ) : (
+                <div>
+                    <div
                         style={{
-                            padding: "8px 10px",
-                            borderRadius: 10,
-                            border: "1px solid #d1d5db",
-                            fontSize: 14,
-                            minWidth: 200,
+                            display: "grid",
+                            gridTemplateColumns: "1fr 1fr auto",
+                            gap: 16,
+                            padding: "0 0 10px 0",
+                            borderBottom: "1px solid #000",
                         }}
                     >
-                        <option value="">Выберите компанию</option>
-                        {companies.map((c) => (
-                            <option key={c.CompanyID} value={c.CompanyID}>
-                                {c.Name}
-                            </option>
+                        {["Компания", "Услуга", ""].map((h) => (
+                            <span key={h} style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "0.6px" }}>
+                                {h}
+                            </span>
                         ))}
-                    </select>
-
-                    <input
-                        value={newServiceTitle}
-                        onChange={(e) => setNewServiceTitle(e.target.value)}
-                        placeholder="Название услуги"
-                        style={{
-                            flex: 1,
-                            minWidth: 260,
-                            padding: "8px 10px",
-                            border: "1px solid #d1d5db",
-                            borderRadius: 10,
-                            fontSize: 14,
-                        }}
-                    />
-
-                    <button
-                        type="submit"
-                        disabled={creating}
-                        style={{
-                            padding: "8px 16px",
-                            borderRadius: 10,
-                            border: "none",
-                            background: creating ? "#93c5fd" : "#2563eb",
-                            color: "white",
-                            fontWeight: 500,
-                            fontSize: 14,
-                            cursor: creating ? "default" : "pointer",
-                        }}
-                    >
-                        {creating ? "Добавление..." : "Добавить"}
-                    </button>
-                </form>
-
-                {items.length === 0 ? (
-                    <div style={{ fontSize: 14, color: "#6b7280" }}>
-                        У ваших компаний пока нет привязанных услуг.
                     </div>
-                ) : (
-                    <div>
-                        <div
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "1.2fr 1fr auto auto",
-                                gap: 10,
-                                fontWeight: 600,
-                                marginBottom: 8,
-                                fontSize: 14,
-                                color: "#4b5563",
-                            }}
-                        >
-                            <div>Компания</div>
-                            <div>Услуга</div>
-                            <div />
-                            <div />
-                        </div>
 
-                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                            {items.map((cs) => {
-                                const title = cs.Service?.Title || `Услуга #${cs.ServiceID}`;
-                                const isEditing = editingCompanyServiceId === cs.CompanyServiceID;
-
-                                return (
-                                    <div
-                                        key={cs.CompanyServiceID}
-                                        style={{
-                                            display: "grid",
-                                            gridTemplateColumns: "1.2fr 1fr auto auto",
-                                            gap: 10,
-                                            alignItems: "center",
-                                            border: "1px solid #e5e7eb",
-                                            borderRadius: 10,
-                                            padding: 10,
-                                            background: "#f9fafb",
-                                        }}
-                                    >
-                                        <div style={{ fontSize: 14, color: "#111827" }}>
-                                            {cs.Company?.Name || "Компания ?"}
-                                        </div>
-
-                                        <div>
-                                            {isEditing ? (
-                                                <input
-                                                    value={editingTitle}
-                                                    onChange={(e) => setEditingTitle(e.target.value)}
-                                                    style={{
-                                                        width: "100%",
-                                                        padding: "6px 8px",
-                                                        border: "1px solid #d1d5db",
-                                                        borderRadius: 8,
-                                                        fontSize: 14,
-                                                    }}
-                                                />
-                                            ) : (
-                                                <span style={{ fontSize: 14, color: "#111827" }}>
-                          {title}
-                        </span>
-                                            )}
-                                        </div>
-
-                                        <div>
-                                            {isEditing ? (
-                                                <>
-                                                    <button
-                                                        onClick={saveEdit}
-                                                        type="button"
-                                                        style={{
-                                                            padding: "6px 10px",
-                                                            borderRadius: 8,
-                                                            border: "none",
-                                                            background: "#10b981",
-                                                            color: "white",
-                                                            fontSize: 13,
-                                                            marginRight: 6,
-                                                            cursor: "pointer",
-                                                        }}
-                                                    >
-                                                        Сохранить
-                                                    </button>
-                                                    <button
-                                                        onClick={cancelEdit}
-                                                        type="button"
-                                                        style={{
-                                                            padding: "6px 10px",
-                                                            borderRadius: 8,
-                                                            border: "1px solid #d1d5db",
-                                                            background: "white",
-                                                            fontSize: 13,
-                                                            cursor: "pointer",
-                                                        }}
-                                                    >
-                                                        Отмена
-                                                    </button>
-                                                </>
-                                            ) : (
-                                                <button
-                                                    onClick={() => startEdit(cs)}
-                                                    type="button"
-                                                    style={{
-                                                        padding: "6px 10px",
-                                                        borderRadius: 8,
-                                                        border: "1px solid #d1d5db",
-                                                        background: "white",
-                                                        fontSize: 13,
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    Редактировать
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        <div>
+                    {items.map((cs) => {
+                        const title = cs.Service?.Title || `Услуга #${cs.ServiceID}`;
+                        const isEditing = editingId === cs.CompanyServiceID;
+                        return (
+                            <div
+                                key={cs.CompanyServiceID}
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "1fr 1fr auto",
+                                    gap: 16,
+                                    alignItems: "center",
+                                    padding: "14px 0",
+                                    borderBottom: "1px solid #e8e8e8",
+                                }}
+                            >
+                                <span style={{ fontSize: 13, color: "#000", fontWeight: 500 }}>
+                                    {cs.Company?.Name || "—"}
+                                </span>
+                                <div>
+                                    {isEditing ? (
+                                        <input
+                                            value={editingTitle}
+                                            onChange={(e) => setEditingTitle(e.target.value)}
+                                            style={{ ...inputStyle, width: "100%", border: "1px solid #000" }}
+                                            autoFocus
+                                        />
+                                    ) : (
+                                        <span style={{ fontSize: 13, color: "#666" }}>{title}</span>
+                                    )}
+                                </div>
+                                <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                                    {isEditing ? (
+                                        <>
+                                            <button onClick={onSaveEdit} style={{ ...btnPrimary, padding: "5px 14px" }}>
+                                                Сохранить
+                                            </button>
+                                            <button onClick={() => setEditingId(null)} style={btnOutline}>
+                                                Отмена
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
                                             <button
-                                                onClick={() => handleDeleteBinding(cs.CompanyServiceID)}
-                                                type="button"
-                                                style={{
-                                                    padding: "6px 10px",
-                                                    borderRadius: 8,
-                                                    border: "none",
-                                                    background: "#ef4444",
-                                                    color: "white",
-                                                    fontSize: 13,
-                                                    cursor: "pointer",
-                                                }}
+                                                onClick={() => { setEditingId(cs.CompanyServiceID); setEditingServiceId(cs.ServiceID); setEditingTitle(title); }}
+                                                style={btnOutline}
+                                            >
+                                                Изменить
+                                            </button>
+                                            <button
+                                                onClick={() => handleDelete(cs.CompanyServiceID)}
+                                                style={{ ...btnOutline, color: "#999" }}
                                             >
                                                 Удалить
                                             </button>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
-                )}
-            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
         </div>
     );
 }

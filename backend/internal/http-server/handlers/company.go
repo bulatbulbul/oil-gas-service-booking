@@ -45,6 +45,11 @@ func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if company.Name == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
+		return
+	}
+
 	// привязываем компанию к текущему пользователю
 	company.UserID = userID
 
@@ -144,6 +149,11 @@ func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(company); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	if company.Name == "" {
+		http.Error(w, "name is required", http.StatusBadRequest)
 		return
 	}
 

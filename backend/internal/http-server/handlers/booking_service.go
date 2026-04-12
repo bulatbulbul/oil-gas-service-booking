@@ -45,6 +45,15 @@ func (h *BookingServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if input.BookingID <= 0 {
+		http.Error(w, "booking_id is required", http.StatusBadRequest)
+		return
+	}
+	if input.CompanyServiceID <= 0 {
+		http.Error(w, "company_service_id is required", http.StatusBadRequest)
+		return
+	}
+
 	bookingService := models.BookingService{
 		BookingID:        input.BookingID,
 		CompanyServiceID: input.CompanyServiceID,

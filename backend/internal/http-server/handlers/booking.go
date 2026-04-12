@@ -68,14 +68,25 @@ func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 		input.UserID = &userID
 	}
 
+	validStatuses := map[string]bool{
+		"requested": true,
+		"active":    true,
+		"approved":  true,
+		"completed": true,
+		"cancelled": true,
+	}
+	if input.Status == "" {
+		input.Status = "requested"
+	}
+	if !validStatuses[input.Status] {
+		http.Error(w, "status must be one of: requested, active, approved, completed, cancelled", http.StatusBadRequest)
+		return
+	}
+
 	booking := models.Booking{
 		UserID:      input.UserID,
 		Description: input.Description,
 		Status:      input.Status,
-	}
-
-	if booking.Status == "" {
-		booking.Status = "requested"
 	}
 
 	if err := h.repo.Create(&booking); err != nil {

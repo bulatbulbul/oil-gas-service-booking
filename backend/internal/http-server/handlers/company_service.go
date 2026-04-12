@@ -53,6 +53,15 @@ func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if input.CompanyID <= 0 {
+		http.Error(w, "company_id is required", http.StatusBadRequest)
+		return
+	}
+	if input.ServiceID <= 0 {
+		http.Error(w, "service_id is required", http.StatusBadRequest)
+		return
+	}
+
 	cs := models.CompanyService{
 		CompanyID: input.CompanyID,
 		ServiceID: input.ServiceID,

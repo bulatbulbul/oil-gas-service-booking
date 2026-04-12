@@ -1,39 +1,15 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { api } from "../api";
+import { Link } from "react-router-dom";
+import { useLogin } from "../hooks/useLogin";
 
 function LoginPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const navigate = useNavigate();
+    const { loading, error, handleLogin } = useLogin();
 
-    async function handleSubmit(e: React.FormEvent) {
+    function onSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!email.trim() || !password.trim()) {
-            setError("Заполните все поля");
-            return;
-        }
-
-        try {
-            setLoading(true);
-            setError(null);
-
-            const res = await api.post("/auth/login", { email: email.trim(), password });
-            const token = res.data.token;
-            const userRole = res.data.role;
-
-            localStorage.setItem("authToken", token);
-            localStorage.setItem("userRole", userRole);
-
-            navigate("/search");
-        } catch (err: any) {
-            console.log("LOGIN ERROR", err.response?.data);
-            setError(err.response?.data?.error || "Ошибка авторизации");
-        } finally {
-            setLoading(false);
-        }
+        handleLogin(email, password);
     }
 
     return (
@@ -41,15 +17,28 @@ function LoginPage() {
             <div className="auth-container">
                 <div className="auth-card">
                     <div className="auth-header">
-                        <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                            <circle cx="50" cy="50" r="45" fill="#007bff" stroke="white" strokeWidth="3"/>
-                            <text x="50" y="58" textAnchor="middle" fill="white" fontSize="24" fontWeight="bold">OG</text>
-                        </svg>
-                        <h1>OilGas Booking</h1>
-                        <p>Вход в личный кабинет</p>
+                        <div
+                            style={{
+                                width: 36,
+                                height: 36,
+                                background: "#000",
+                                borderRadius: 2,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#fff",
+                                fontSize: 12,
+                                fontWeight: 700,
+                                letterSpacing: "0.5px",
+                            }}
+                        >
+                            OG
+                        </div>
+                        <h1>Вход</h1>
+                        <p>OilGas Booking</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="auth-form">
+                    <form onSubmit={onSubmit} className="auth-form">
                         <div className="form-group">
                             <label>Email</label>
                             <input

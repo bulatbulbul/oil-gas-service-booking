@@ -11,6 +11,7 @@ import (
 
 	"oil-gas-service-booking/internal/config"
 	"oil-gas-service-booking/internal/http-server/handlers"
+	authmw "oil-gas-service-booking/internal/http-server/middleware"
 	"oil-gas-service-booking/internal/http-server/repository"
 	"oil-gas-service-booking/internal/http-server/router"
 	"oil-gas-service-booking/internal/storage"
@@ -22,10 +23,11 @@ import (
 // @version 1.0
 // @host localhost:8082
 // @BasePath /
-
 // @securityDefinitions.basic BasicAuth
 func main() {
 	cfg := config.MustLoad()
+
+	authmw.SetJWTSecret(cfg.JWTSecret)
 
 	db, err := storage.NewGorm(cfg.Storage)
 	if err != nil {
@@ -50,7 +52,6 @@ func main() {
 	companyServiceHandler := handlers.NewCompanyServiceHandler(companyServiceRepo, companyRepo)
 
 	r := router.NewRouter(
-		db,
 		companyHandler,
 		userHandler,
 		bookingHandler,

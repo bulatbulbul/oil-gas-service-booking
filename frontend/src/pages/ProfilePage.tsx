@@ -1,223 +1,103 @@
-import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import api from "../api";
+import { Link } from "react-router-dom";
+import { useProfile } from "../hooks/useProfile";
 
-type Me = {
-    id: number;
-    name: string;
-    email: string | null;
-    role: string;
-};
+const pageStyle: React.CSSProperties = { maxWidth: 960, margin: "0 auto", padding: "48px 32px" };
 
 function ProfilePage() {
-    const navigate = useNavigate();
+    const { me, loading, error, handleLogout } = useProfile();
 
-    const [me, setMe] = useState<Me | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    if (loading) return <div style={pageStyle}><span style={{ color: "#999", fontSize: 14 }}>Загрузка...</span></div>;
+    if (error) return <div style={pageStyle}><span style={{ color: "#000", fontSize: 14 }}>{error}</span></div>;
 
-    function handleLogout() {
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("userRole");
-        navigate("/login");
-    }
-
-    useEffect(() => {
-        async function load() {
-            try {
-                setLoading(true);
-                setError(null);
-                const res = await api.get("/auth/me");
-                setMe(res.data);
-            } catch (err: any) {
-                setError("Не удалось загрузить профиль");
-            } finally {
-                setLoading(false);
-            }
-        }
-        load();
-    }, []);
-
-    if (loading) return <div style={{ padding: 20 }}>Загрузка...</div>;
-    if (error) return <div style={{ padding: 20, color: "red" }}>{error}</div>;
-
-    const initials =
-        me?.name
-            ?.split(" ")
-            .map((p) => p[0])
-            .join("")
-            .toUpperCase() || "U";
+    const initials = me?.name?.split(" ").map((p) => p[0]).join("").toUpperCase().slice(0, 2) || "U";
 
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "32px 16px",
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: 520,
-                    width: "100%",
-                    background: "white",
-                    borderRadius: 16,
-                    padding: 20,
-                    boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
-                }}
-            >
-                <h2
-                    style={{
-                        margin: 0,
-                        fontSize: 22,
-                        fontWeight: 700,
-                        color: "#111827",
-                        marginBottom: 20,
-                    }}
-                >
-                    Личный кабинет
-                </h2>
+        <div style={pageStyle}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 40 }}>
+                Профиль
+            </h1>
 
+            <div style={{ display: "flex", alignItems: "center", gap: 20, marginBottom: 40, paddingBottom: 40, borderBottom: "1px solid #e8e8e8" }}>
                 <div
                     style={{
+                        width: 56,
+                        height: 56,
+                        background: "#000",
+                        borderRadius: 2,
+                        color: "#fff",
                         display: "flex",
-                        gap: 16,
                         alignItems: "center",
-                        marginBottom: 20,
+                        justifyContent: "center",
+                        fontWeight: 700,
+                        fontSize: 18,
+                        flexShrink: 0,
+                        letterSpacing: "0.5px",
                     }}
                 >
-                    <div
-                        style={{
-                            width: 64,
-                            height: 64,
-                            borderRadius: "999px",
-                            background: "#2563eb",
-                            color: "white",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            fontWeight: 600,
-                            fontSize: 24,
-                        }}
-                    >
-                        {initials}
-                    </div>
-
-                    <div>
-                        <div
-                            style={{
-                                fontSize: 18,
-                                fontWeight: 600,
-                                color: "#111827",
-                            }}
-                        >
-                            {me?.name || "Без имени"}
-                        </div>
-                        <div
-                            style={{
-                                marginTop: 4,
-                                fontSize: 14,
-                                color: "#6b7280",
-                            }}
-                        >
-                            {me?.email || "Email не указан"}
-                        </div>
-                    </div>
+                    {initials}
                 </div>
-
-                <div
-                    style={{
-                        padding: 16,
-                        borderRadius: 12,
-                        background: "#f9fafb",
-                        border: "1px solid #e5e7eb",
-                        marginBottom: 20,
-                    }}
-                >
-                    <div
-                        style={{
-                            fontSize: 14,
-                            color: "#6b7280",
-                            marginBottom: 10,
-                        }}
-                    >
-                        Быстрый переход:
+                <div>
+                    <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.4px", color: "#000" }}>
+                        {me?.name || "Без имени"}
                     </div>
-                    <div
-                        style={{
-                            display: "flex",
-                            flexWrap: "wrap",
-                            gap: 10,
-                        }}
-                    >
-                        <Link
-                            to="/bookings/my"
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: 999,
-                                background: "#e0f2fe",
-                                color: "#075985",
-                                textDecoration: "none",
-                                fontSize: 14,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Мои бронирования
-                        </Link>
-                        <Link
-                            to="/companies"
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: 999,
-                                background: "#eef2ff",
-                                color: "#3730a3",
-                                textDecoration: "none",
-                                fontSize: 14,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Мои компании
-                        </Link>
-                        <Link
-                            to="/my-services"
-                            style={{
-                                padding: "8px 14px",
-                                borderRadius: 999,
-                                background: "#ecfdf3",
-                                color: "#166534",
-                                textDecoration: "none",
-                                fontSize: 14,
-                                fontWeight: 500,
-                            }}
-                        >
-                            Мои услуги
-                        </Link>
+                    <div style={{ marginTop: 2, fontSize: 13, color: "#666" }}>
+                        {me?.email || "Email не указан"}
                     </div>
-                </div>
-
-                <div
-                    style={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                    }}
-                >
-                    <button
-                        onClick={handleLogout}
-                        style={{
-                            padding: "8px 16px",
-                            borderRadius: 8,
-                            border: "none",
-                            background: "#ef4444",
-                            color: "white",
-                            fontSize: 14,
-                            fontWeight: 500,
-                            cursor: "pointer",
-                        }}
-                    >
-                        Выйти из аккаунта
-                    </button>
+                    <div style={{ marginTop: 4, fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "0.6px" }}>
+                        {me?.role === "admin" ? "Администратор" : "Пользователь"}
+                    </div>
                 </div>
             </div>
+
+            <div style={{ marginBottom: 40 }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "0.6px", marginBottom: 16 }}>
+                    Быстрый переход
+                </div>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                    {[
+                        { to: "/bookings/my", label: "Мои брони" },
+                        { to: "/companies", label: "Мои компании" },
+                        { to: "/my-services", label: "Мои услуги" },
+                        { to: "/search", label: "Поиск услуги" },
+                    ].map((item) => (
+                        <Link
+                            key={item.to}
+                            to={item.to}
+                            style={{
+                                padding: "8px 16px",
+                                border: "1px solid #e8e8e8",
+                                borderRadius: 2,
+                                fontSize: 13,
+                                color: "#000",
+                                textDecoration: "none",
+                                fontWeight: 500,
+                            }}
+                        >
+                            {item.label}
+                        </Link>
+                    ))}
+                </div>
+            </div>
+
+            <button
+                onClick={handleLogout}
+                style={{
+                    padding: "10px 24px",
+                    border: "1px solid #000",
+                    borderRadius: 2,
+                    background: "#fff",
+                    color: "#000",
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    letterSpacing: "0.2px",
+                }}
+                onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f4")}
+                onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+            >
+                Выйти из аккаунта
+            </button>
         </div>
     );
 }

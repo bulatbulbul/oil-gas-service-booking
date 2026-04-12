@@ -1,368 +1,184 @@
-import { useEffect, useState } from "react";
-import api from "../api";
+import { useSearch } from "../hooks/useSearch";
 
-type Service = {
-    ServiceID: number;
-    Title: string;
-};
+const pageStyle: React.CSSProperties = { maxWidth: 960, margin: "0 auto", padding: "48px 32px" };
 
-type CompanyServiceResult = {
-    CompanyID: number;
-    Name: string;
-    CompanyServiceID: number;
-};
-
+const statusBoxStyle = (isError: boolean): React.CSSProperties => ({
+    padding: "10px 16px",
+    border: `1px solid ${isError ? "#000" : "#e8e8e8"}`,
+    borderRadius: 2,
+    fontSize: 13,
+    color: "#000",
+    background: "#fafafa",
+    marginBottom: 16,
+});
 
 function SearchServicesPage() {
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState<CompanyServiceResult[]>([]);
-    const [allServices, setAllServices] = useState<Service[]>([]);
-    const [filteredServices, setFilteredServices] = useState<Service[]>([]);
-    const [showSuggestions, setShowSuggestions] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [servicesLoading, setServicesLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [message, setMessage] = useState<string | null>(null);
-
-    // Загружаем все услуги при первой загрузке
-    useEffect(() => {
-        async function loadServices() {
-            try {
-                setServicesLoading(true);
-                const res = await api.get("/services");
-                setAllServices(Array.isArray(res.data) ? res.data : []);
-            } catch (err: any) {
-                console.log("SERVICES LOAD ERROR", err.response?.status, err.response?.data);
-            } finally {
-                setServicesLoading(false);
-            }
-        }
-        loadServices();
-    }, []);
-
-    // Фильтруем услуги при изменении query
-    useEffect(() => {
-        if (query.trim()) {
-            const filtered = allServices.filter((s) =>
-                s.Title.toLowerCase().includes(query.toLowerCase())
-            );
-            setFilteredServices(filtered);
-            setShowSuggestions(filtered.length > 0);
-        } else {
-            setFilteredServices([]);
-            setShowSuggestions(false);
-        }
-    }, [query]);
-
-    async function handleSearch(e: React.FormEvent) {
-        e.preventDefault();
-        setError(null);
-        setMessage(null);
-
-        if (!query.trim()) return;
-
-        try {
-            setLoading(true);
-            const res = await api.get(
-                `/business/companies-by-service/${encodeURIComponent(query)}`
-            );
-            console.log("SEARCH RESULTS", res.data);
-            setResults(Array.isArray(res.data) ? res.data : []);
-
-            if (res.data.length === 0) {
-                setMessage("Услуга не найдена у доступных компаний");
-            }
-            setShowSuggestions(false); // Скрываем подсказки после поиска
-        } catch (err: any) {
-            console.log("SEARCH ERROR", err.response?.status, err.response?.data);
-            setError("Ошибка поиска услуги");
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    function handleSelectService(serviceTitle: string) {
-        setQuery(serviceTitle);
-        setShowSuggestions(false);
-    }
-
-    async function handleBook(company: CompanyServiceResult) {
-        try {
-            setError(null);
-            setMessage(null);
-
-            // 1. создаём бронирование
-            const bookingRes = await api.post("/bookings", {
-                description: `Бронирование услуги "${query}" в компании "${company.Name}"`,
-                status: "requested",
-            });
-
-            const booking = bookingRes.data;
-
-            // 2. привязываем услугу к бронированию
-            await api.post("/booking-services", {
-                booking_id: booking.BookingID,
-                company_service_id: company.CompanyServiceID,
-                notes: null,
-            });
-
-            setMessage(
-                `Создано бронирование #${booking.BookingID} с услугой компании "${company.Name}".`
-            );
-            setResults([]);
-            setQuery("");
-        } catch (err: any) {
-            console.log("BOOK ERROR", err.response?.status, err.response?.data);
-            setError("Не удалось создать бронирование с услугой");
-        }
-    }
+    const {
+        query,
+        results,
+        filteredServices,
+        showSuggestions,
+        loading,
+        servicesLoading,
+        error,
+        message,
+        onQueryChange,
+        selectSuggestion,
+        setShowSuggestions,
+        handleSearch,
+        handleBook,
+    } = useSearch();
 
     return (
-        <div
-            style={{
-                minHeight: "calc(100vh - 160px)",
-                display: "flex",
-                justifyContent: "center",
-                padding: "32px 16px",
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: 900,
-                    width: "100%",
-                }}
-            >
-                <div
-                    style={{
-                        background: "white",
-                        borderRadius: 16,
-                        padding: 24,
-                        boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
-                        marginBottom: 24,
-                    }}
-                >
-                    <h2
-                        style={{
-                            fontSize: 22,
-                            fontWeight: 600,
-                            marginBottom: 8,
-                            color: "#111827",
-                        }}
-                    >
-                        Поиск услуги
-                    </h2>
-                    <p
-                        style={{
-                            fontSize: 14,
-                            color: "#6b7280",
-                            marginBottom: 20,
-                        }}
-                    >
-                        Найдите нужную услугу и узнайте, какие компании её предоставляют.
-                    </p>
+        <div style={pageStyle}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
+                Поиск услуги
+            </h1>
+            <p style={{ fontSize: 13, color: "#666", marginBottom: 36 }}>
+                Найдите услугу и выберите компанию для бронирования
+            </p>
 
-                    <form onSubmit={handleSearch} style={{ position: "relative" }}>
-                        <div
+            <form onSubmit={handleSearch} style={{ marginBottom: 32 }}>
+                <div style={{ display: "flex", gap: 8, position: "relative" }}>
+                    <div style={{ flex: 1, position: "relative" }}>
+                        <input
+                            type="text"
+                            value={query}
+                            onChange={(e) => onQueryChange(e.target.value)}
+                            placeholder={servicesLoading ? "Загрузка услуг..." : "Название услуги..."}
+                            onFocus={() => query.trim() && setShowSuggestions(filteredServices.length > 0)}
+                            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                            disabled={servicesLoading}
                             style={{
-                                display: "flex",
-                                gap: 8,
-                                marginBottom: 20,
-                                position: "relative",
+                                width: "100%",
+                                padding: "11px 14px",
+                                border: "1px solid #000",
+                                borderRadius: 2,
+                                fontSize: 14,
+                                fontFamily: "inherit",
+                                outline: "none",
+                                boxSizing: "border-box",
                             }}
-                        >
-                            <div style={{ flex: 1, position: "relative" }}>
-                                <input
-                                    type="text"
-                                    value={query}
-                                    onChange={(e) => setQuery(e.target.value)}
-                                    placeholder="Введите название услуги (нажмите чтобы увидеть список)..."
-                                    onFocus={() => {
-                                        if (query.trim()) {
-                                            setShowSuggestions(filteredServices.length > 0);
-                                        }
-                                    }}
-                                    onBlur={() => {
-                                        // Задержка, чтобы успеть кликнуть на вариант
-                                        setTimeout(() => setShowSuggestions(false), 200);
-                                    }}
-                                    style={{
-                                        width: "100%",
-                                        padding: "10px 12px",
-                                        border: "1px solid #d1d5db",
-                                        borderRadius: 10,
-                                        fontSize: 14,
-                                        boxSizing: "border-box",
-                                    }}
-                                />
+                        />
 
-                                {/* Всплывающий список услуг */}
-                                {showSuggestions && filteredServices.length > 0 && (
-                                    <div
-                                        style={{
-                                            position: "absolute",
-                                            top: "100%",
-                                            left: 0,
-                                            right: 0,
-                                            background: "white",
-                                            border: "1px solid #d1d5db",
-                                            borderTop: "none",
-                                            borderRadius: "0 0 10px 10px",
-                                            maxHeight: 250,
-                                            overflowY: "auto",
-                                            zIndex: 10,
-                                            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                                        }}
-                                    >
-                                        {filteredServices.map((service) => (
-                                            <div
-                                                key={service.ServiceID}
-                                                onClick={() => handleSelectService(service.Title)}
-                                                style={{
-                                                    padding: "10px 12px",
-                                                    cursor: "pointer",
-                                                    borderBottom: "1px solid #e5e7eb",
-                                                    fontSize: 14,
-                                                    color: "#111827",
-                                                    transition: "background-color 150ms",
-                                                }}
-                                                onMouseEnter={(e) => {
-                                                    (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                                                        "#f3f4f6";
-                                                }}
-                                                onMouseLeave={(e) => {
-                                                    (e.currentTarget as HTMLDivElement).style.backgroundColor =
-                                                        "white";
-                                                }}
-                                            >
-                                                {service.Title}
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-
-                            <button
-                                type="submit"
-                                disabled={loading || servicesLoading}
+                        {showSuggestions && filteredServices.length > 0 && (
+                            <div
                                 style={{
-                                    padding: "10px 20px",
-                                    borderRadius: 10,
-                                    border: "none",
-                                    background: loading ? "#93c5fd" : "#2563eb",
-                                    color: "white",
-                                    fontWeight: 500,
-                                    fontSize: 14,
-                                    cursor: loading ? "default" : "pointer",
+                                    position: "absolute",
+                                    top: "100%",
+                                    left: 0,
+                                    right: 0,
+                                    background: "#fff",
+                                    border: "1px solid #000",
+                                    borderTop: "none",
+                                    borderRadius: "0 0 2px 2px",
+                                    maxHeight: 240,
+                                    overflowY: "auto",
+                                    zIndex: 20,
                                 }}
                             >
-                                {loading ? "Поиск..." : "Найти"}
-                            </button>
-                        </div>
-                    </form>
+                                {filteredServices.map((svc) => (
+                                    <div
+                                        key={svc.ServiceID}
+                                        onMouseDown={() => selectSuggestion(svc.Title)}
+                                        style={{
+                                            padding: "10px 14px",
+                                            fontSize: 13,
+                                            color: "#000",
+                                            cursor: "pointer",
+                                            borderBottom: "1px solid #f4f4f4",
+                                        }}
+                                        onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f4")}
+                                        onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+                                    >
+                                        {svc.Title}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                    {/* Статусы */}
-                    {servicesLoading && (
-                        <div style={{ fontSize: 14, color: "#6b7280" }}>
-                            Загрузка списка услуг...
-                        </div>
-                    )}
-
-                    {error && (
-                        <div
-                            style={{
-                                fontSize: 14,
-                                color: "#dc2626",
-                                padding: "10px 12px",
-                                background: "#fee2e2",
-                                borderRadius: 8,
-                                marginBottom: 12,
-                            }}
-                        >
-                            {error}
-                        </div>
-                    )}
-
-                    {message && (
-                        <div
-                            style={{
-                                fontSize: 14,
-                                color: "#059669",
-                                padding: "10px 12px",
-                                background: "#d1fae5",
-                                borderRadius: 8,
-                                marginBottom: 12,
-                            }}
-                        >
-                            {message}
-                        </div>
-                    )}
-                </div>
-
-                {/* Результаты поиска */}
-                {results.length > 0 && (
-                    <div
+                    <button
+                        type="submit"
+                        disabled={loading || servicesLoading}
                         style={{
-                            background: "white",
-                            borderRadius: 16,
-                            padding: 24,
-                            boxShadow: "0 12px 30px rgba(15, 23, 42, 0.12)",
+                            padding: "11px 28px",
+                            background: "#000",
+                            color: "#fff",
+                            border: "none",
+                            borderRadius: 2,
+                            fontSize: 14,
+                            fontWeight: 600,
+                            cursor: loading ? "default" : "pointer",
+                            fontFamily: "inherit",
+                            opacity: loading ? 0.5 : 1,
+                            letterSpacing: "0.2px",
+                            flexShrink: 0,
                         }}
                     >
-                        <h3
-                            style={{
-                                fontSize: 18,
-                                fontWeight: 600,
-                                marginBottom: 16,
-                                color: "#111827",
-                            }}
-                        >
-                            Компании, предоставляющие услугу «{query}»
-                        </h3>
+                        {loading ? "Поиск..." : "Найти"}
+                    </button>
+                </div>
+            </form>
 
+            {error && <div style={statusBoxStyle(true)}>{error}</div>}
+            {message && <div style={statusBoxStyle(false)}>{message}</div>}
+
+            {results.length > 0 && (
+                <div>
+                    <div style={{ marginBottom: 16, paddingBottom: 12, borderBottom: "1px solid #000" }}>
+                        <span style={{ fontSize: 14, fontWeight: 600, color: "#000" }}>
+                            Компании, предоставляющие «{query}»
+                        </span>
+                        <span style={{ fontSize: 13, color: "#666", marginLeft: 10 }}>
+                            {results.length} результатов
+                        </span>
+                    </div>
+
+                    {results.map((company) => (
                         <div
+                            key={company.CompanyServiceID}
                             style={{
                                 display: "flex",
-                                flexDirection: "column",
-                                gap: 10,
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                padding: "16px 0",
+                                borderBottom: "1px solid #e8e8e8",
+                                gap: 16,
                             }}
                         >
-                            {results.map((company) => (
-                                <div
-                                    key={company.CompanyServiceID}
-                                    style={{
-                                        display: "flex",
-                                        alignItems: "center",
-                                        justifyContent: "space-between",
-                                        padding: 12,
-                                        border: "1px solid #e5e7eb",
-                                        borderRadius: 10,
-                                        background: "#f9fafb",
-                                    }}
-                                >
-                                    <div style={{ fontSize: 14, color: "#111827", fontWeight: 500 }}>
-                                        {company.Name}
-                                    </div>
-                                    <button
-                                        onClick={() => handleBook(company)}
-                                        style={{
-                                            padding: "8px 16px",
-                                            borderRadius: 8,
-                                            border: "none",
-                                            background: "#2563eb",
-                                            color: "white",
-                                            fontSize: 13,
-                                            fontWeight: 500,
-                                            cursor: "pointer",
-                                        }}
-                                    >
-                                        Забронировать
-                                    </button>
+                            <div>
+                                <div style={{ fontSize: 15, fontWeight: 600, color: "#000" }}>
+                                    {company.Name}
                                 </div>
-                            ))}
+                                <div style={{ fontSize: 12, color: "#999", marginTop: 2 }}>
+                                    ID компании: {company.CompanyID}
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleBook(company)}
+                                style={{
+                                    padding: "8px 20px",
+                                    background: "#000",
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 2,
+                                    fontSize: 13,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                    flexShrink: 0,
+                                    letterSpacing: "0.2px",
+                                }}
+                                onMouseEnter={e => (e.currentTarget.style.opacity = "0.8")}
+                                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                            >
+                                Забронировать
+                            </button>
                         </div>
-                    </div>
-                )}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

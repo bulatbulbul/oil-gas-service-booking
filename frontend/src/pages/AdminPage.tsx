@@ -1,82 +1,44 @@
 import { Link } from "react-router-dom";
 
+const sections = [
+    { to: "/admin/users", label: "Пользователи", desc: "Просмотр и удаление аккаунтов" },
+    { to: "/admin/analytics", label: "Аналитика", desc: "Активные бронирования и статистика" },
+];
+
 function AdminPage() {
     return (
-        <div
-            style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "32px 16px",
-            }}
-        >
-            <div
-                style={{
-                    maxWidth: 420,
-                    width: "100%",
-                    background: "white",
-                    borderRadius: 12,
-                    padding: 20,
-                    boxShadow: "0 8px 20px rgba(15, 23, 42, 0.08)",
-                }}
-            >
-                <h2
-                    style={{
-                        margin: 0,
-                        fontSize: 20,
-                        fontWeight: 600,
-                        color: "#111827",
-                        marginBottom: 12,
-                    }}
-                >
-                    Админ‑панель
-                </h2>
+        <div style={{ maxWidth: 960, margin: "0 auto", padding: "48px 32px" }}>
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
+                Администратор
+            </h1>
+            <p style={{ fontSize: 13, color: "#666", marginBottom: 40 }}>
+                Управление платформой
+            </p>
 
-                <p
-                    style={{
-                        margin: 0,
-                        marginBottom: 16,
-                        fontSize: 14,
-                        color: "#6b7280",
-                    }}
-                >
-                    Разделы управления.
-                </p>
-
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        gap: 8,
-                    }}
-                >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, maxWidth: 560 }}>
+                {sections.map((s) => (
                     <Link
-                        to="/admin/users"
+                        key={s.to}
+                        to={s.to}
                         style={{
-                            padding: "9px 12px",
-                            borderRadius: 8,
-                            border: "1px solid #e5e7eb",
+                            padding: "24px",
+                            border: "1px solid #e8e8e8",
+                            borderRadius: 4,
                             textDecoration: "none",
-                            fontSize: 14,
-                            color: "#111827",
+                            display: "block",
+                            transition: "border-color 0.15s",
                         }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = "#000")}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = "#e8e8e8")}
                     >
-                        Пользователи
+                        <div style={{ fontSize: 15, fontWeight: 700, color: "#000", marginBottom: 6, letterSpacing: "-0.3px" }}>
+                            {s.label}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#999" }}>
+                            {s.desc}
+                        </div>
                     </Link>
-
-                    <Link
-                        to="/admin/analytics"
-                        style={{
-                            padding: "9px 12px",
-                            borderRadius: 8,
-                            border: "1px solid #e5e7eb",
-                            textDecoration: "none",
-                            fontSize: 14,
-                            color: "#111827",
-                        }}
-                    >
-                        Аналитика
-                    </Link>
-                </div>
+                ))}
             </div>
         </div>
     );
