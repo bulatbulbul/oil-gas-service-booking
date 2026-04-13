@@ -1,16 +1,7 @@
 import { useMyBookings } from "../hooks/useMyBookings";
 import StatusBadge from "../components/StatusBadge";
 
-const pageStyle: React.CSSProperties = { maxWidth: 960, margin: "0 auto", padding: "48px 32px" };
-const inputStyle: React.CSSProperties = {
-    padding: "9px 14px",
-    border: "1px solid #e8e8e8",
-    borderRadius: 2,
-    fontSize: 13,
-    fontFamily: "inherit",
-    outline: "none",
-    color: "#000",
-};
+const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 
 function MyBookingsPage() {
     const { bookings, filtered, loading, error, q, setQ, sort, setSort, handleDelete } = useMyBookings();
@@ -23,21 +14,31 @@ function MyBookingsPage() {
             <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
                 Мои бронирования
             </h1>
-            <p style={{ fontSize: 13, color: "#666", marginBottom: 32 }}>
-                Всего: {bookings.length}
+            <p style={{ fontSize: 13, color: "#666", marginBottom: 28 }}>
+                {bookings.length} {bookings.length === 1 ? "бронирование" : "бронирований"}
             </p>
 
+            {/* Фильтры */}
             <div style={{ display: "flex", gap: 8, marginBottom: 32, flexWrap: "wrap" }}>
-                <input
-                    value={q}
-                    onChange={(e) => setQ(e.target.value)}
-                    placeholder="Поиск по ID, статусу, описанию..."
-                    style={{ ...inputStyle, flex: 1, minWidth: 240 }}
-                />
+                <div style={{ position: "relative", flex: 1, minWidth: 240 }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                        style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.35, pointerEvents: "none" }}>
+                        <circle cx="6" cy="6" r="4.5" stroke="#000" strokeWidth="1.3" />
+                        <path d="M9.5 9.5L12 12" stroke="#000" strokeWidth="1.3" strokeLinecap="round" />
+                    </svg>
+                    <input
+                        value={q}
+                        onChange={(e) => setQ(e.target.value)}
+                        placeholder="Поиск по описанию..."
+                        style={{ width: "100%", padding: "10px 12px 10px 34px", border: "1px solid #e0e0e0", borderRadius: 6, fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box", background: "#fafafa", color: "#000" }}
+                        onFocus={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.background = "#fff"; }}
+                        onBlur={e => { e.currentTarget.style.borderColor = "#e0e0e0"; e.currentTarget.style.background = "#fafafa"; }}
+                    />
+                </div>
                 <select
                     value={sort}
                     onChange={(e) => setSort(e.target.value as "new" | "old")}
-                    style={{ ...inputStyle, minWidth: 160 }}
+                    style={{ padding: "10px 14px", border: "1px solid #e0e0e0", borderRadius: 6, fontSize: 13, fontFamily: "inherit", outline: "none", background: "#fafafa", color: "#000", minWidth: 160 }}
                 >
                     <option value="new">Сначала новые</option>
                     <option value="old">Сначала старые</option>
@@ -45,7 +46,7 @@ function MyBookingsPage() {
             </div>
 
             {q && (
-                <p style={{ fontSize: 12, color: "#999", marginBottom: 16 }}>
+                <p style={{ fontSize: 12, color: "#999", marginBottom: 20 }}>
                     Найдено: {filtered.length} из {bookings.length}
                 </p>
             )}
@@ -55,55 +56,24 @@ function MyBookingsPage() {
                     {q ? "Ничего не найдено" : "У вас пока нет бронирований"}
                 </p>
             ) : (
-                <div>
-                    <div
-                        style={{
-                            display: "grid",
-                            gridTemplateColumns: "80px 120px 1fr 100px",
-                            padding: "0 0 10px 0",
-                            borderBottom: "1px solid #000",
-                            gap: 16,
-                        }}
-                    >
-                        {["ID", "Статус", "Описание", ""].map((h) => (
-                            <span key={h} style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "0.6px" }}>
-                                {h}
-                            </span>
-                        ))}
-                    </div>
-
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
                     {filtered.map((b) => (
                         <div
                             key={b.BookingID}
-                            style={{
-                                display: "grid",
-                                gridTemplateColumns: "80px 120px 1fr 100px",
-                                alignItems: "center",
-                                padding: "14px 0",
-                                borderBottom: "1px solid #e8e8e8",
-                                gap: 16,
-                            }}
+                            style={{ border: "1px solid #e8e8e8", borderRadius: 6, padding: "20px", display: "flex", flexDirection: "column", gap: 12, background: "#fff" }}
+                            onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)")}
+                            onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                         >
-                            <span style={{ fontSize: 13, fontWeight: 600, color: "#000" }}>
-                                #{b.BookingID}
-                            </span>
-                            <StatusBadge status={b.Status} />
-                            <span style={{ fontSize: 13, color: "#666" }}>
-                                {b.Description || "—"}
-                            </span>
-                            <div style={{ textAlign: "right" }}>
+                            <div>
+                                <StatusBadge status={b.Status} />
+                            </div>
+                            <p style={{ fontSize: 13, color: "#444", lineHeight: 1.5, margin: 0, flex: 1 }}>
+                                {b.Description || <span style={{ color: "#bbb" }}>Без описания</span>}
+                            </p>
+                            <div style={{ borderTop: "1px solid #f0f0f0", paddingTop: 12 }}>
                                 <button
                                     onClick={() => handleDelete(b.BookingID)}
-                                    style={{
-                                        padding: "5px 12px",
-                                        border: "1px solid #e8e8e8",
-                                        borderRadius: 2,
-                                        background: "#fff",
-                                        color: "#999",
-                                        fontSize: 12,
-                                        cursor: "pointer",
-                                        fontFamily: "inherit",
-                                    }}
+                                    style={{ padding: "6px 14px", border: "1px solid #e8e8e8", borderRadius: 4, background: "#fff", color: "#999", fontSize: 12, cursor: "pointer", fontFamily: "inherit" }}
                                     onMouseEnter={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.color = "#000"; }}
                                     onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#999"; }}
                                 >

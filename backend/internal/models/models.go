@@ -8,6 +8,7 @@ type Company struct {
 	Name        string    `gorm:"column:name;not null"`
 	Description *string   `gorm:"column:description"`
 	Address     *string   `gorm:"column:address"`
+	LogoURL     *string   `gorm:"column:logo_url" json:"logo_url"`
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"column:updated_at;autoUpdateTime"`
 
@@ -88,3 +89,16 @@ type BookingService struct {
 }
 
 func (BookingService) TableName() string { return "booking_service" }
+
+type ServiceRequest struct {
+	RequestID   int64     `gorm:"column:request_id;primaryKey;autoIncrement" json:"request_id"`
+	UserID      int64     `gorm:"column:user_id;not null;index" json:"user_id"`
+	ServiceName string    `gorm:"column:service_name;not null" json:"service_name"`
+	Comment     *string   `gorm:"column:comment" json:"comment"`
+	Status      string    `gorm:"column:status;default:'pending'" json:"status"` // pending, reviewed
+	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
+
+	User User `gorm:"foreignKey:UserID;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user,omitempty"`
+}
+
+func (ServiceRequest) TableName() string { return "service_request" }

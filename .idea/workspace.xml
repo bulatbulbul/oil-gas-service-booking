@@ -4,33 +4,22 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="29fec1b5-4d72-4192-aa61-aec689d569f3" name="Changes" comment="fixed the errors">
+    <list default="true" id="29fec1b5-4d72-4192-aa61-aec689d569f3" name="Changes" comment="refactor(frontend): separate concerns into api/, hooks/, components/ layers">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/cmd/main.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/config/config.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/config/config.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/handlers/booking.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/handlers/booking.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/handlers/booking_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/handlers/booking_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/handlers/company.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/handlers/company.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/handlers/company_service.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/handlers/company_service.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/middleware/auth.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/middleware/auth.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/http-server/repository/business_repo.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/repository/business_repo.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/internal/http-server/router/router.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/http-server/router/router.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/models/models.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/models/models.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/storage/gorm.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/storage/gorm.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/api.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/api.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminAnalyticsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminAnalyticsPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUserBookingsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUserBookingsPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/AdminUsersPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/AdminUsersPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/CompaniesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/CompaniesPage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/HomePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/HomePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/LoginPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/MyBookingsPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MyBookingsPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/MyServicesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/MyServicesPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/ProfilePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/ProfilePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/RegisterPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/SearchServicesPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/SearchServicesPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,30 +56,31 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Go Build.go build main.go.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.GoLinterPluginOnboarding&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.GoLinterPluginStorageMigration&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.automatic.dependencies.download&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
-    &quot;go.sdk.automatically.set&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/bulat/OneDrive/Документы/study/diplom/oil-gas-service-booking/oil-gas-service-booking&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/bulat/AppData/Roaming/JetBrains/GoLand2025.2/node/versions/24.13.0/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
-    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\bulat\\OneDrive\\Документы\\study\\diplom\\oil-gas-service-booking\\oil-gas-service-booking\\frontend\\node_modules\\typescript\\lib&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Go Build.go build main.go.executor": "Run",
+    "RunOnceActivity.GoLinterPluginOnboarding": "true",
+    "RunOnceActivity.GoLinterPluginStorageMigration": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.go.formatter.settings.were.checked": "true",
+    "RunOnceActivity.go.migrated.go.modules.settings": "true",
+    "RunOnceActivity.go.modules.automatic.dependencies.download": "true",
+    "RunOnceActivity.go.modules.go.list.on.any.changes.was.set": "true",
+    "git-widget-placeholder": "main",
+    "go.import.settings.migrated": "true",
+    "go.sdk.automatically.set": "true",
+    "last_opened_file_path": "C:/Users/bulat/OneDrive/Документы/study/diplom/oil-gas-service-booking/oil-gas-service-booking",
+    "node.js.detected.package.eslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "nodejs_interpreter_path": "C:/Users/bulat/AppData/Roaming/JetBrains/GoLand2025.2/node/versions/24.13.0/node",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "ts.external.directory.path": "C:\\Users\\bulat\\OneDrive\\Документы\\study\\diplom\\oil-gas-service-booking\\oil-gas-service-booking\\frontend\\node_modules\\typescript\\lib"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="go build main.go" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
       <module name="oil-gas-service-booking" />
@@ -133,6 +123,17 @@
     <option featureType="dependencySupport" implementationName="executable:docker" />
     <option featureType="dependencySupport" implementationName="javascript:npm:vite" />
     <option featureType="dependencySupport" implementationName="executable:kubectl" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="completed the base frontend and backend" />

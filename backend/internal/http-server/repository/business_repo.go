@@ -36,9 +36,10 @@ func Select[T any, R any](collection []T, selector func(T) R) []R {
 }
 
 type CompanyServiceSearchResult struct {
-	CompanyID        int64  `json:"CompanyID"`
-	Name             string `json:"Name"`
-	CompanyServiceID int64  `json:"CompanyServiceID"`
+	CompanyID        int64   `json:"CompanyID"`
+	Name             string  `json:"Name"`
+	CompanyServiceID int64   `json:"CompanyServiceID"`
+	LogoURL          *string `json:"LogoURL"`
 }
 
 func (r *BusinessRepo) FindCompaniesByService(serviceTitle string) ([]CompanyServiceSearchResult, error) {
@@ -57,7 +58,8 @@ func (r *BusinessRepo) FindCompaniesByService(serviceTitle string) ([]CompanySer
 				results = append(results, CompanyServiceSearchResult{
 					CompanyID:        c.CompanyID,
 					Name:             c.Name,
-					CompanyServiceID: cs.CompanyServiceID, // поле из модели связи
+					CompanyServiceID: cs.CompanyServiceID,
+					LogoURL:          c.LogoURL,
 				})
 			}
 		}

@@ -57,7 +57,6 @@ function ProfilePage() {
                     {[
                         { to: "/bookings/my", label: "Мои брони" },
                         { to: "/companies", label: "Мои компании" },
-                        { to: "/my-services", label: "Мои услуги" },
                         { to: "/search", label: "Поиск услуги" },
                     ].map((item) => (
                         <Link

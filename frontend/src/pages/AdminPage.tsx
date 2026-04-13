@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 const sections = [
     { to: "/admin/users", label: "Пользователи", desc: "Просмотр и удаление аккаунтов" },
     { to: "/admin/analytics", label: "Аналитика", desc: "Активные бронирования и статистика" },
+    { to: "/admin/service-requests", label: "Заявки на услуги", desc: "Запросы пользователей на новые услуги" },
 ];
 
 function AdminPage() {

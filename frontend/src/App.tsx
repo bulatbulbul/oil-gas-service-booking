@@ -15,6 +15,7 @@ import SearchServicesPage from "./pages/SearchServicesPage";
 import MyServicesPage from "./pages/MyServicesPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminUserBookingsPage from "./pages/AdminUserBookingsPage";
+import AdminServiceRequestsPage from "./pages/AdminServiceRequestsPage";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 
@@ -83,6 +84,7 @@ function App() {
                     <Route path="/admin/users" element={<AdminRoute><AdminUsersPage /></AdminRoute>} />
                     <Route path="/admin/analytics" element={<AdminRoute><AdminAnalyticsPage /></AdminRoute>} />
                     <Route path="/admin/users/:id/bookings" element={<AdminRoute><AdminUserBookingsPage /></AdminRoute>} />
+                    <Route path="/admin/service-requests" element={<AdminRoute><AdminServiceRequestsPage /></AdminRoute>} />
                     <Route path="/companies" element={<PrivateRoute><CompaniesPage /></PrivateRoute>} />
                     <Route path="/services" element={<PrivateRoute><ServicesPage /></PrivateRoute>} />
                     <Route path="/bookings" element={<PrivateRoute><BookingsPage /></PrivateRoute>} />

@@ -42,6 +42,8 @@ func main() {
 	bookingServiceRepo := repository.NewBookingServiceRepo(db)
 	companyServiceRepo := repository.NewCompanyServiceRepo(db)
 
+	uploadsDir := "./uploads"
+
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
 	bookingHandler := handlers.NewBookingHandler(bookingRepo)
@@ -50,6 +52,8 @@ func main() {
 	authHandler := handlers.NewAuthHandler(db)
 	bookingServiceHandler := handlers.NewBookingServiceHandler(bookingServiceRepo)
 	companyServiceHandler := handlers.NewCompanyServiceHandler(companyServiceRepo, companyRepo)
+	uploadHandler := handlers.NewUploadHandler(db, uploadsDir)
+	serviceRequestHandler := handlers.NewServiceRequestHandler(db)
 
 	r := router.NewRouter(
 		companyHandler,
@@ -60,6 +64,9 @@ func main() {
 		authHandler,
 		bookingServiceHandler,
 		companyServiceHandler,
+		uploadHandler,
+		uploadsDir,
+		serviceRequestHandler,
 	)
 
 	host := cfg.HTTPServer.Address

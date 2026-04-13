@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
@@ -18,6 +20,9 @@ func NewRouter(
 	authHandler *handlers.AuthHandler,
 	bookingServiceHandler *handlers.BookingServiceHandler,
 	companyServiceHandler *handlers.CompanyServiceHandler,
+	uploadHandler *handlers.UploadHandler,
+	uploadsDir string,
+	serviceRequestHandler *handlers.ServiceRequestHandler,
 ) *chi.Mux {
 
 	r := chi.NewRouter()
@@ -110,6 +115,20 @@ func NewRouter(
 		// полный список: только admin
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/", companyServiceHandler.GetAll)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/{id}", companyServiceHandler.GetByID)
+	})
+
+	// ------------ UPLOAD ------------
+	r.Route("/upload", func(r chi.Router) {
+		r.With(authmw.BasicAuthMiddleware(false)).Post("/companies/{id}/logo", uploadHandler.UploadCompanyLogo)
+	})
+
+	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
+
+	// ------------ SERVICE REQUESTS ------------
+	r.Route("/service-requests", func(r chi.Router) {
+		r.With(authmw.BasicAuthMiddleware(false)).Post("/", serviceRequestHandler.Create)
+		r.With(authmw.BasicAuthMiddleware(true)).Get("/", serviceRequestHandler.GetAll)
+		r.With(authmw.BasicAuthMiddleware(true)).Put("/{id}/status", serviceRequestHandler.UpdateStatus)
 	})
 
 	// ------------ BUSINESS (аналитика) ------------
