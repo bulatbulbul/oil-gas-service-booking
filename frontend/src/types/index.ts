@@ -22,6 +22,9 @@ export type Booking = {
     BookingID: number;
     Status: string;
     Description?: string | null;
+    CreatedAt?: string;
+    User?: User | null;
+    BookingServices?: BookingService[];
 };
 
 export type User = {
@@ -65,13 +68,13 @@ export type BookingService = {
     };
 };
 
-export const BOOKING_STATUSES = ["requested", "active", "approved", "completed", "cancelled"] as const;
+export const BOOKING_STATUSES = ["requested", "approved", "completed", "rejected", "cancelled"] as const;
 export type BookingStatus = typeof BOOKING_STATUSES[number];
 
 export const BOOKING_STATUS_LABELS: Record<string, string> = {
     requested: "Заявка",
-    active: "Активно",
-    approved: "Подтверждено",
-    completed: "Завершено",
-    cancelled: "Отменено",
+    approved:  "Подтверждено",
+    completed: "Выполнено",
+    rejected:  "Отказ",
+    cancelled: "Отменено клиентом",
 };

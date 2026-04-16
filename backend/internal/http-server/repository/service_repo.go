@@ -36,3 +36,12 @@ func (r *ServiceRepo) Update(service *models.Service) error {
 func (r *ServiceRepo) Delete(id int64) error {
 	return r.db.Delete(&models.Service{}, id).Error
 }
+
+// GetAvailable - только услуги, привязанные хотя бы к одной компании
+func (r *ServiceRepo) GetAvailable() ([]models.Service, error) {
+	var services []models.Service
+	err := r.db.
+		Where("service_id IN (SELECT DISTINCT service_id FROM company_service)").
+		Find(&services).Error
+	return services, err
+}

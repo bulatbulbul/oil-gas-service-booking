@@ -35,6 +35,10 @@ export async function deleteMyBooking(id: number): Promise<void> {
     await api.delete(`/bookings/${id}/me`);
 }
 
+export async function cancelMyBooking(id: number): Promise<void> {
+    await api.put(`/bookings/${id}/cancel`);
+}
+
 export async function createBookingService(bookingId: number, companyServiceId: number, notes?: string): Promise<void> {
     await api.post("/booking-services", {
         booking_id: bookingId,
@@ -46,4 +50,13 @@ export async function createBookingService(bookingId: number, companyServiceId: 
 export async function getBookingServices(bookingId: number): Promise<BookingService[]> {
     const res = await api.get(`/bookings/${bookingId}/services`);
     return Array.isArray(res.data) ? res.data : [];
+}
+
+export async function getCompanyBookings(): Promise<Booking[]> {
+    const res = await api.get("/bookings/company");
+    return Array.isArray(res.data) ? res.data : [];
+}
+
+export async function updateCompanyBookingStatus(id: number, status: string): Promise<void> {
+    await api.put(`/bookings/${id}/company-status`, { status });
 }

@@ -8,6 +8,7 @@ export function useCompanies() {
     const [error, setError] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [logoUploading, setLogoUploading] = useState<number | null>(null);
+    const [logoVersions, setLogoVersions] = useState<Record<number, number>>({});
     const logoInputRef = useRef<HTMLInputElement>(null);
     const uploadingForIdRef = useRef<number | null>(null);
 
@@ -71,6 +72,7 @@ export function useCompanies() {
             setLogoUploading(companyId);
             const { logo_url } = await uploadCompanyLogo(companyId, file);
             setCompanies(prev => prev.map(c => c.CompanyID === companyId ? { ...c, logo_url } : c));
+            setLogoVersions(prev => ({ ...prev, [companyId]: Date.now() }));
         } catch {
             alert("Не удалось загрузить логотип");
         } finally {
@@ -83,6 +85,6 @@ export function useCompanies() {
     return {
         companies, loading, error, creating,
         handleCreate, handleUpdate, handleDelete,
-        logoUploading, logoInputRef, openLogoUpload, handleLogoChange,
+        logoUploading, logoVersions, logoInputRef, openLogoUpload, handleLogoChange,
     };
 }

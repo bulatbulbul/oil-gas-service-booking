@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getAllServices } from "../api/services";
+import { getAvailableServices } from "../api/services";
 import { getCompaniesByService } from "../api/business";
 import { createBooking, createBookingService } from "../api/bookings";
 import { createServiceRequest } from "../api/serviceRequests";
@@ -25,7 +25,7 @@ export function useSearch() {
     const [requestSending, setRequestSending] = useState(false);
 
     useEffect(() => {
-        getAllServices()
+        getAvailableServices()
             .then(setAllServices)
             .finally(() => setServicesLoading(false));
     }, []);

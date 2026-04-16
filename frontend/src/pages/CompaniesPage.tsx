@@ -11,6 +11,7 @@ const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", paddi
 function CompanyCard({
     company,
     logoUploading,
+    logoVersion,
     onSelect,
     onEdit,
     onDelete,
@@ -18,6 +19,7 @@ function CompanyCard({
 }: {
     company: Company;
     logoUploading: number | null;
+    logoVersion?: number;
     onSelect: () => void;
     onEdit: () => void;
     onDelete: () => void;
@@ -39,7 +41,7 @@ function CompanyCard({
                         Загрузка...
                     </div>
                 ) : company.logo_url ? (
-                    <img src={`${BASE_URL}${company.logo_url}`} alt={company.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    <img src={`${BASE_URL}${company.logo_url}${logoVersion ? `?v=${logoVersion}` : ""}`} alt={company.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                 ) : (
                     <div style={{ width: "100%", height: "100%", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 40, letterSpacing: 1 }}>
                         {initial}
@@ -90,7 +92,7 @@ function CompanyCard({
 
 // ── Детальный вид компании ───────────────────────────────────────────────────
 
-function CompanyDetail({ company, onBack }: { company: Company; onBack: () => void }) {
+function CompanyDetail({ company, logoVersion, onBack }: { company: Company; logoVersion?: number; onBack: () => void }) {
     const { items, loading, creating, handleCreate, handleUpdateService, handleDelete } = useMyServices();
     const [newTitle, setNewTitle] = useState("");
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -125,7 +127,7 @@ function CompanyDetail({ company, onBack }: { company: Company; onBack: () => vo
                 {/* Лого */}
                 <div style={{ width: 280, flexShrink: 0, aspectRatio: "1/1", borderRadius: 8, overflow: "hidden", border: "1px solid #e8e8e8" }}>
                     {company.logo_url ? (
-                        <img src={`${BASE_URL}${company.logo_url}`} alt={company.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        <img src={`${BASE_URL}${company.logo_url}${logoVersion ? `?v=${logoVersion}` : ""}`} alt={company.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
                     ) : (
                         <div style={{ width: "100%", height: "100%", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 56, letterSpacing: 2 }}>
                             {company.Name.trim()[0]?.toUpperCase()}
@@ -242,7 +244,7 @@ function CompaniesPage() {
     const {
         companies, loading, error, creating,
         handleCreate, handleUpdate, handleDelete,
-        logoUploading, logoInputRef, openLogoUpload, handleLogoChange,
+        logoUploading, logoVersions, logoInputRef, openLogoUpload, handleLogoChange,
     } = useCompanies();
 
     const [newName, setNewName] = useState("");
@@ -264,7 +266,7 @@ function CompaniesPage() {
         const fresh = companies.find(c => c.CompanyID === selectedCompany.CompanyID) ?? selectedCompany;
         return (
             <div style={pageStyle}>
-                <CompanyDetail company={fresh} onBack={() => setSelectedCompany(null)} />
+                <CompanyDetail company={fresh} logoVersion={logoVersions[fresh.CompanyID]} onBack={() => setSelectedCompany(null)} />
             </div>
         );
     }
@@ -335,6 +337,7 @@ function CompaniesPage() {
                             key={c.CompanyID}
                             company={c}
                             logoUploading={logoUploading}
+                            logoVersion={logoVersions[c.CompanyID]}
                             onSelect={() => setSelectedCompany(c)}
                             onEdit={() => { setEditingId(c.CompanyID); setEditingName(c.Name); }}
                             onDelete={() => handleDelete(c.CompanyID)}

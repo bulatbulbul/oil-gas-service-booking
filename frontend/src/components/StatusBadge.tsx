@@ -1,5 +1,11 @@
+import { BOOKING_STATUS_LABELS } from "../types";
+
 type Props = {
     status: string;
+};
+
+const STATUS_TEXT: Record<string, string> = {
+    ...BOOKING_STATUS_LABELS,
 };
 
 function StatusBadge({ status }: Props) {
@@ -15,19 +21,25 @@ function StatusBadge({ status }: Props) {
             letterSpacing: "0.5px",
             display: "inline-block",
         };
-        if (s === "active" || s === "approved") {
-            return { ...base, background: "#000", color: "#fff" };
+        if (s === "requested") {
+            return { ...base, background: "#e8f0fe", color: "#1a56db" };
         }
-        if (s === "cancelled") {
-            return { ...base, background: "#fff", color: "#999", border: "1px solid #e8e8e8" };
+        if (s === "approved") {
+            return { ...base, background: "#e6f4ea", color: "#1e7e34" };
         }
         if (s === "completed") {
-            return { ...base, background: "#f4f4f4", color: "#666" };
+            return { ...base, background: "#f1f3f4", color: "#5f6368" };
+        }
+        if (s === "rejected") {
+            return { ...base, background: "#fce8e6", color: "#c0392b" };
+        }
+        if (s === "cancelled") {
+            return { ...base, background: "#f4f4f4", color: "#9aa0a6" };
         }
         return { ...base, background: "#f4f4f4", color: "#000" };
     })();
 
-    return <span style={style}>{status}</span>;
+    return <span style={style}>{STATUS_TEXT[s] ?? status}</span>;
 }
 
 export default StatusBadge;

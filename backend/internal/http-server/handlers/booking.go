@@ -70,16 +70,16 @@ func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	validStatuses := map[string]bool{
 		"requested": true,
-		"active":    true,
 		"approved":  true,
 		"completed": true,
+		"rejected":  true,
 		"cancelled": true,
 	}
 	if input.Status == "" {
 		input.Status = "requested"
 	}
 	if !validStatuses[input.Status] {
-		http.Error(w, "status must be one of: requested, active, approved, completed, cancelled", http.StatusBadRequest)
+		http.Error(w, "status must be one of: requested, approved, completed, rejected, cancelled", http.StatusBadRequest)
 		return
 	}
 
@@ -228,6 +228,136 @@ func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetMyCompanyBookings godoc
+// @Summary Получить бронирования услуг моих компаний
+// @Tags bookings
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /bookings/company [get]
+func (h *BookingHandler) GetMyCompanyBookings(w http.ResponseWriter, r *http.Request) {
+	userID, _, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "user not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	bookings, err := h.repo.GetByCompanyOwner(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(bookings)
+}
+
+// UpdateMyCompanyBookingStatus godoc
+// @Summary Обновить статус бронирования (для владельца компании)
+// @Tags bookings
+// @Security BasicAuth
+// @Param id path int true "Booking ID"
+// @Success 200
+// @Failure 401
+// @Failure 403
+// @Router /bookings/{id}/company-status [put]
+func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *http.Request) {
+	userID, _, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "user not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	owned, err := h.repo.IsBookingOwnedByCompanyOwner(id, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !owned {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	var body struct {
+		Status string `json:"status"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	validStatuses := map[string]bool{
+		"requested": true,
+		"approved":  true,
+		"completed": true,
+		"rejected":  true,
+		"cancelled": true,
+	}
+	if !validStatuses[body.Status] {
+		http.Error(w, "invalid status", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.repo.UpdateStatus(id, body.Status); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// CancelMy godoc
+// @Summary Отменить своё бронирование (статус → cancelled)
+// @Tags bookings
+// @Security BasicAuth
+// @Param id path int true "Booking ID"
+// @Success 200
+// @Failure 400
+// @Failure 401
+// @Failure 403
+// @Router /bookings/{id}/cancel [put]
+func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
+	userID, _, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "user not authenticated", http.StatusUnauthorized)
+		return
+	}
+
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
+
+	booking, err := h.repo.GetByID(id)
+	if err != nil {
+		http.Error(w, "booking not found", http.StatusNotFound)
+		return
+	}
+
+	if booking.UserID == nil || *booking.UserID != userID {
+		http.Error(w, "forbidden", http.StatusForbidden)
+		return
+	}
+
+	if booking.Status != "requested" && booking.Status != "approved" {
+		http.Error(w, "cannot cancel booking with status: "+booking.Status, http.StatusBadRequest)
+		return
+	}
+
+	if err := h.repo.UpdateStatus(id, "cancelled"); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (h *BookingHandler) DeleteMy(w http.ResponseWriter, r *http.Request) {

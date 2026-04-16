@@ -1,6 +1,22 @@
-import { useMyBookings } from "../hooks/useMyBookings";
+import { useCompanyBookings } from "../hooks/useCompanyBookings";
 import StatusBadge from "../components/StatusBadge";
 import { BOOKING_STATUSES, BOOKING_STATUS_LABELS } from "../types";
+
+const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
+
+const NEXT_STATUSES: Record<string, string[]> = {
+    requested: ["approved", "rejected"],
+    approved:  ["completed", "rejected"],
+    completed: [],
+    rejected:  [],
+    cancelled: [],
+};
+
+const ACTION_STYLE: Record<string, React.CSSProperties> = {
+    approved:  { background: "#e6f4ea", color: "#1e7e34", border: "1px solid #b7dfbf" },
+    completed: { background: "#000",    color: "#fff",    border: "1px solid #000" },
+    rejected:  { background: "#fce8e6", color: "#c0392b", border: "1px solid #f5c0bb" },
+};
 
 function formatDate(iso?: string) {
     if (!iso) return null;
@@ -10,20 +26,22 @@ function formatDate(iso?: string) {
     });
 }
 
-const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
-
-function MyBookingsPage() {
-    const { bookings, filtered, loading, error, q, setQ, statusFilter, setStatusFilter, sort, setSort, handleDelete } = useMyBookings();
+function CompanyBookingsPage() {
+    const {
+        bookings, filtered, loading, error,
+        q, setQ, statusFilter, setStatusFilter, sort, setSort,
+        handleStatusChange,
+    } = useCompanyBookings();
 
     if (loading) return <div style={pageStyle}><span style={{ color: "#999", fontSize: 14 }}>Загрузка...</span></div>;
-    if (error) return <div style={pageStyle}><span style={{ fontSize: 14 }}>{error}</span></div>;
+    if (error)   return <div style={pageStyle}><span style={{ fontSize: 14 }}>{error}</span></div>;
 
     return (
         <div style={pageStyle}>
-            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
-                Мои бронирования
+            <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 4 }}>
+                Входящие заявки
             </h1>
-            <p style={{ fontSize: 13, color: "#666", marginBottom: 28 }}>
+            <p style={{ fontSize: 13, color: "#999", marginBottom: 28 }}>
                 {bookings.length} {bookings.length === 1 ? "бронирование" : "бронирований"}
             </p>
 
@@ -37,7 +55,7 @@ function MyBookingsPage() {
                 <input
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    placeholder="Поиск по описанию..."
+                    placeholder="Поиск по клиенту, услуге, описанию..."
                     style={{ width: "100%", padding: "10px 12px 10px 34px", border: "1px solid #e0e0e0", borderRadius: 6, fontSize: 13, fontFamily: "inherit", outline: "none", boxSizing: "border-box", background: "#fafafa", color: "#000" }}
                     onFocus={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.background = "#fff"; }}
                     onBlur={e => { e.currentTarget.style.borderColor = "#e0e0e0"; e.currentTarget.style.background = "#fafafa"; }}
@@ -95,14 +113,15 @@ function MyBookingsPage() {
 
             {filtered.length === 0 ? (
                 <p style={{ fontSize: 14, color: "#999" }}>
-                    {q || statusFilter !== "all" ? "Ничего не найдено" : "У вас пока нет бронирований"}
+                    {q || statusFilter !== "all" ? "Ничего не найдено" : "Пока нет бронирований на услуги ваших компаний"}
                 </p>
             ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {filtered.map((b) => {
+                        const nextStatuses = NEXT_STATUSES[b.Status] ?? [];
                         const companies = [...new Set(
                             (b.BookingServices ?? [])
-                                .map(bs => bs.CompanyService?.Company?.Name)
+                                .map((bs) => bs.CompanyService?.Company?.Name)
                                 .filter(Boolean)
                         )];
 
@@ -113,7 +132,7 @@ function MyBookingsPage() {
                                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)")}
                                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                             >
-                                {/* Шапка: статус + дата */}
+                                {/* Верхняя полоса: статус + дата */}
                                 <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #f4f4f4" }}>
                                     <StatusBadge status={b.Status} />
                                     {b.CreatedAt && (
@@ -123,27 +142,38 @@ function MyBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Тело */}
+                                {/* Основное тело */}
                                 <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
 
-                                    {/* Компания */}
-                                    {companies.length > 0 && (
+                                    {/* Кто + у кого */}
+                                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                         <div>
-                                            <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>
-                                                {companies.length === 1 ? "Компания" : "Компании"}
-                                            </div>
-                                            {companies.map(c => (
-                                                <div key={c} style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{c}</div>
-                                            ))}
+                                            <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Клиент</div>
+                                            {b.User ? (
+                                                <>
+                                                    <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{b.User.Name}</div>
+                                                    {b.User.Email && <div style={{ fontSize: 12, color: "#888" }}>{b.User.Email}</div>}
+                                                </>
+                                            ) : (
+                                                <div style={{ fontSize: 13, color: "#bbb" }}>—</div>
+                                            )}
                                         </div>
-                                    )}
+                                        {companies.length > 0 && (
+                                            <div>
+                                                <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Компания</div>
+                                                {companies.map((c) => (
+                                                    <div key={c} style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{c}</div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
 
                                     {/* Услуги */}
                                     {(b.BookingServices ?? []).length > 0 && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>Услуги</div>
                                             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                                                {(b.BookingServices ?? []).map(bs => (
+                                                {(b.BookingServices ?? []).map((bs) => (
                                                     <span
                                                         key={bs.BookingServiceID}
                                                         style={{ padding: "4px 10px", background: "#f7f7f7", borderRadius: 4, fontSize: 12, color: "#333", border: "1px solid #efefef" }}
@@ -159,22 +189,36 @@ function MyBookingsPage() {
                                     {b.Description && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Комментарий</div>
-                                            <p style={{ fontSize: 13, color: "#555", lineHeight: 1.6, margin: 0 }}>{b.Description}</p>
+                                            <p style={{ fontSize: 13, color: "#555", lineHeight: 1.6, margin: 0 }}>
+                                                {b.Description}
+                                            </p>
                                         </div>
                                     )}
                                 </div>
 
-                                {/* Футер */}
-                                {(b.Status === "requested" || b.Status === "approved") && (
-                                    <div style={{ padding: "12px 20px", borderTop: "1px solid #f4f4f4" }}>
-                                        <button
-                                            onClick={() => handleDelete(b.BookingID)}
-                                            style={{ padding: "6px 16px", border: "1px solid #e8e8e8", borderRadius: 4, background: "#fff", color: "#999", fontSize: 12, cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s" }}
-                                            onMouseEnter={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.color = "#000"; }}
-                                            onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#999"; }}
-                                        >
-                                            Отменить заявку
-                                        </button>
+                                {/* Футер: кнопки действий */}
+                                {nextStatuses.length > 0 && (
+                                    <div style={{ padding: "12px 20px", borderTop: "1px solid #f4f4f4", display: "flex", gap: 8 }}>
+                                        {nextStatuses.map((s) => (
+                                            <button
+                                                key={s}
+                                                onClick={() => handleStatusChange(b.BookingID, s)}
+                                                style={{
+                                                    padding: "6px 16px",
+                                                    borderRadius: 4,
+                                                    fontSize: 12,
+                                                    fontWeight: 500,
+                                                    cursor: "pointer",
+                                                    fontFamily: "inherit",
+                                                    transition: "opacity 0.15s",
+                                                    ...(ACTION_STYLE[s] ?? { background: "#fff", color: "#000", border: "1px solid #e8e8e8" }),
+                                                }}
+                                                onMouseEnter={e => (e.currentTarget.style.opacity = "0.8")}
+                                                onMouseLeave={e => (e.currentTarget.style.opacity = "1")}
+                                            >
+                                                {BOOKING_STATUS_LABELS[s] ?? s}
+                                            </button>
+                                        ))}
                                     </div>
                                 )}
                             </div>
@@ -186,4 +230,4 @@ function MyBookingsPage() {
     );
 }
 
-export default MyBookingsPage;
+export default CompanyBookingsPage;

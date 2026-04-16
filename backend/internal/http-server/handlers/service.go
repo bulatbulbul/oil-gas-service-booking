@@ -22,17 +22,20 @@ type ServiceRepository interface {
 
 type ServiceHandler struct {
 	repo               ServiceRepository
+	serviceRepo        *repository.ServiceRepo
 	companyRepo        *repository.CompanyRepository
 	companyServiceRepo *repository.CompanyServiceRepo
 }
 
 func NewServiceHandler(
 	repo ServiceRepository,
+	serviceRepo *repository.ServiceRepo,
 	companyRepo *repository.CompanyRepository,
 	companyServiceRepo *repository.CompanyServiceRepo,
 ) *ServiceHandler {
 	return &ServiceHandler{
 		repo:               repo,
+		serviceRepo:        serviceRepo,
 		companyRepo:        companyRepo,
 		companyServiceRepo: companyServiceRepo,
 	}
@@ -174,6 +177,22 @@ func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent)
+}
+
+// GetAvailableServices godoc
+// @Summary Получить услуги, доступные для бронирования (привязаны к компаниям)
+// @Tags services
+// @Security BasicAuth
+// @Success 200 {array} models.Service
+// @Failure 401
+// @Router /services/available [get]
+func (h *ServiceHandler) GetAvailable(w http.ResponseWriter, r *http.Request) {
+	services, err := h.serviceRepo.GetAvailable()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(services)
 }
 
 // GetMyServices godoc

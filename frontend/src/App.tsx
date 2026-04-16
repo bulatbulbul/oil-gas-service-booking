@@ -16,6 +16,7 @@ import MyServicesPage from "./pages/MyServicesPage";
 import ProfilePage from "./pages/ProfilePage";
 import AdminUserBookingsPage from "./pages/AdminUserBookingsPage";
 import AdminServiceRequestsPage from "./pages/AdminServiceRequestsPage";
+import CompanyBookingsPage from "./pages/CompanyBookingsPage";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 
@@ -90,6 +91,7 @@ function App() {
                     <Route path="/bookings" element={<PrivateRoute><BookingsPage /></PrivateRoute>} />
                     <Route path="/bookings/:id" element={<PrivateRoute><BookingDetailsPage /></PrivateRoute>} />
                     <Route path="/bookings/my" element={<PrivateRoute><MyBookingsPage /></PrivateRoute>} />
+                    <Route path="/bookings/company" element={<PrivateRoute><CompanyBookingsPage /></PrivateRoute>} />
                     <Route path="/search" element={<PrivateRoute><SearchServicesPage /></PrivateRoute>} />
                     <Route path="/my-services" element={<PrivateRoute><MyServicesPage /></PrivateRoute>} />
 

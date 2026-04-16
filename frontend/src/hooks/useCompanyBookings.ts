@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { getMyBookings, cancelMyBooking } from "../api/bookings";
+import { getCompanyBookings, updateCompanyBookingStatus } from "../api/bookings";
 import type { Booking } from "../types";
 
-export function useMyBookings() {
+export function useCompanyBookings() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -14,7 +14,7 @@ export function useMyBookings() {
         try {
             setLoading(true);
             setError(null);
-            setBookings(await getMyBookings());
+            setBookings(await getCompanyBookings());
         } catch {
             setError("Не удалось загрузить бронирования");
         } finally {
@@ -24,31 +24,39 @@ export function useMyBookings() {
 
     useEffect(() => { load(); }, []);
 
-    async function handleDelete(id: number) {
-        if (!confirm("Отменить бронирование?")) return;
+    async function handleStatusChange(bookingId: number, status: string) {
         try {
-            await cancelMyBooking(id);
+            await updateCompanyBookingStatus(bookingId, status);
             await load();
         } catch {
-            alert("Не удалось отменить бронирование");
+            alert("Не удалось обновить статус");
         }
     }
 
     const filtered = useMemo(() => {
         const query = q.trim().toLowerCase();
         let list = bookings;
+
         if (statusFilter !== "all") {
             list = list.filter((b) => b.Status === statusFilter);
         }
+
         if (query) {
-            list = list.filter((b) =>
-                `${b.BookingID} ${b.Status} ${b.Description ?? ""}`.toLowerCase().includes(query)
-            );
+            list = list.filter((b) => {
+                const clientName = b.User?.Name ?? "";
+                const services = (b.BookingServices ?? [])
+                    .map((bs) => bs.CompanyService?.Service?.Title ?? "")
+                    .join(" ");
+                return `${b.BookingID} ${b.Status} ${b.Description ?? ""} ${clientName} ${services}`
+                    .toLowerCase()
+                    .includes(query);
+            });
         }
+
         return [...list].sort((a, b) =>
             sort === "new" ? b.BookingID - a.BookingID : a.BookingID - b.BookingID
         );
     }, [bookings, q, statusFilter, sort]);
 
-    return { bookings, filtered, loading, error, q, setQ, statusFilter, setStatusFilter, sort, setSort, handleDelete };
+    return { bookings, filtered, loading, error, q, setQ, statusFilter, setStatusFilter, sort, setSort, handleStatusChange };
 }

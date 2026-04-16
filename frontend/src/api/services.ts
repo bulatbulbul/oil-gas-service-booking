@@ -6,6 +6,11 @@ export async function getAllServices(): Promise<Service[]> {
     return Array.isArray(res.data) ? res.data : [];
 }
 
+export async function getAvailableServices(): Promise<Service[]> {
+    const res = await api.get("/services/available");
+    return Array.isArray(res.data) ? res.data : [];
+}
+
 export async function createService(title: string): Promise<Service> {
     const res = await api.post("/services", { title });
     return res.data;

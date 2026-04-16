@@ -47,7 +47,7 @@ func main() {
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
 	bookingHandler := handlers.NewBookingHandler(bookingRepo)
-	serviceHandler := handlers.NewServiceHandler(serviceRepo, companyRepo, companyServiceRepo)
+	serviceHandler := handlers.NewServiceHandler(serviceRepo, serviceRepo, companyRepo, companyServiceRepo)
 	businessHandler := handlers.NewBusinessHandler(businessRepo)
 	authHandler := handlers.NewAuthHandler(db)
 	bookingServiceHandler := handlers.NewBookingServiceHandler(bookingServiceRepo)

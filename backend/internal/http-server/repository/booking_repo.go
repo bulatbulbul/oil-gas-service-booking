@@ -57,3 +57,31 @@ func (r *BookingRepo) UpdateStatus(bookingID int64, status string) error {
 		Where("booking_id = ?", bookingID).
 		Update("status", status).Error
 }
+
+// GetByCompanyOwner - получить бронирования, в которых есть услуги компаний владельца
+func (r *BookingRepo) GetByCompanyOwner(ownerUserID int64) ([]models.Booking, error) {
+	var bookings []models.Booking
+	err := r.db.
+		Distinct("booking.*").
+		Joins("JOIN booking_service ON booking_service.booking_id = booking.booking_id").
+		Joins("JOIN company_service ON company_service.company_service_id = booking_service.company_service_id").
+		Joins("JOIN company ON company.company_id = company_service.company_id").
+		Where("company.user_id = ?", ownerUserID).
+		Preload("User").
+		Preload("BookingServices.CompanyService.Company").
+		Preload("BookingServices.CompanyService.Service").
+		Find(&bookings).Error
+	return bookings, err
+}
+
+// IsBookingOwnedByCompanyOwner - проверить, есть ли в бронировании услуги компаний пользователя
+func (r *BookingRepo) IsBookingOwnedByCompanyOwner(bookingID, ownerUserID int64) (bool, error) {
+	var count int64
+	err := r.db.
+		Model(&models.BookingService{}).
+		Joins("JOIN company_service ON company_service.company_service_id = booking_service.company_service_id").
+		Joins("JOIN company ON company.company_id = company_service.company_id").
+		Where("booking_service.booking_id = ? AND company.user_id = ?", bookingID, ownerUserID).
+		Count(&count).Error
+	return count > 0, err
+}

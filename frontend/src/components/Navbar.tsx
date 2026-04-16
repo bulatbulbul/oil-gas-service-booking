@@ -1,7 +1,7 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 
-const BASE_URL = "http://localhost:8080";
+const BASE_URL = "http://localhost:8082";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -56,6 +56,7 @@ function Navbar() {
         >
             <Link to="/search" style={linkStyle("/search")}>Поиск услуги</Link>
             <Link to="/bookings/my" style={linkStyle("/bookings/my")}>Мои брони</Link>
+            <Link to="/bookings/company" style={linkStyle("/bookings/company")}>Входящие заявки</Link>
             <Link to="/companies" style={linkStyle("/companies")}>Мои компании</Link>
 
             <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 16 }}>

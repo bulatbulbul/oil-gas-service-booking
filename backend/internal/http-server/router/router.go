@@ -62,6 +62,7 @@ func NewRouter(
 	r.Route("/services", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", serviceHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/", serviceHandler.GetAll)
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/available", serviceHandler.GetAvailable)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/my", serviceHandler.GetMy)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/{id}", serviceHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}", serviceHandler.Update)
@@ -82,6 +83,9 @@ func NewRouter(
 		// создать бронирование: любой залогиненный
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", bookingHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/me", bookingHandler.GetMyBookings)
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/company", bookingHandler.GetMyCompanyBookings)
+		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}/cancel", bookingHandler.CancelMy)
+		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}/company-status", bookingHandler.UpdateMyCompanyBookingStatus)
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}/me", bookingHandler.DeleteMy)
 
 		// полный доступ: только admin
