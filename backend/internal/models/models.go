@@ -23,6 +23,7 @@ type Service struct {
 	Title           string           `gorm:"column:title;not null"`
 	Description     *string          `gorm:"column:description"`
 	Price           *float64         `gorm:"column:price"`
+	ImageURL        *string          `gorm:"column:image_url" json:"image_url"`
 	CreatedAt       time.Time        `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt       time.Time        `gorm:"column:updated_at;autoUpdateTime"`
 	CompanyServices []CompanyService `gorm:"foreignKey:ServiceID"`

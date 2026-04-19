@@ -1,8 +1,7 @@
 import { useCompanyBookings } from "../hooks/useCompanyBookings";
 import StatusBadge from "../components/StatusBadge";
 import { BOOKING_STATUSES, BOOKING_STATUS_LABELS } from "../types";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 

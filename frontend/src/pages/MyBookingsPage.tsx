@@ -1,8 +1,7 @@
 import { useMyBookings } from "../hooks/useMyBookings";
 import StatusBadge from "../components/StatusBadge";
 import { BOOKING_STATUSES, BOOKING_STATUS_LABELS } from "../types";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 
 function formatDate(iso?: string) {
     if (!iso) return null;

@@ -73,10 +73,7 @@ func NewRouter(
 
 	// ------------ USERS (только admin) ------------
 	r.Route("/users", func(r chi.Router) {
-		r.With(authmw.BasicAuthMiddleware(true)).Post("/", userHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/", userHandler.GetAll)
-		r.With(authmw.BasicAuthMiddleware(true)).Get("/{id}", userHandler.GetByID)
-		r.With(authmw.BasicAuthMiddleware(true)).Put("/{id}", userHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(true)).Delete("/{id}", userHandler.Delete)
 	})
 
@@ -100,27 +97,15 @@ func NewRouter(
 
 	// ------------ BOOKING-SERVICES ------------
 	r.Route("/booking-services", func(r chi.Router) {
-		// привязать услугу к бронированию: любой залогиненный
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", bookingServiceHandler.Create)
-
-		// полный доступ: только admin
-		r.With(authmw.BasicAuthMiddleware(true)).Get("/", bookingServiceHandler.GetAll)
-		r.With(authmw.BasicAuthMiddleware(true)).Get("/{id}", bookingServiceHandler.GetByID)
-		r.With(authmw.BasicAuthMiddleware(true)).Put("/{id}", bookingServiceHandler.Update)
-		r.With(authmw.BasicAuthMiddleware(true)).Delete("/{id}", bookingServiceHandler.Delete)
 	})
 
 	// ------------ COMPANY-SERVICES (любой залогиненный) ------------
 	r.Route("/company-services", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/my", companyServiceHandler.GetMy)
-		// любой customer может привязывать услуги к СВОИМ компаниям
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", companyServiceHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}", companyServiceHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", companyServiceHandler.Delete)
-
-		// полный список: только admin
-		r.With(authmw.BasicAuthMiddleware(true)).Get("/", companyServiceHandler.GetAll)
-		r.With(authmw.BasicAuthMiddleware(true)).Get("/{id}", companyServiceHandler.GetByID)
 	})
 
 	// ------------ UPLOAD ------------

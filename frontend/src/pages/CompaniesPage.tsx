@@ -2,8 +2,7 @@ import { useState } from "react";
 import { useCompanies } from "../hooks/useCompanies";
 import { useMyServices } from "../hooks/useMyServices";
 import type { Company } from "../types";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 
 // ── Карточка компании ────────────────────────────────────────────────────────

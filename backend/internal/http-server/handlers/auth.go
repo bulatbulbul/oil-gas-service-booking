@@ -77,14 +77,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role := in.Role
-	if role == "" {
-		role = "customer"
-	}
-	if role != "customer" && role != "admin" {
-		http.Error(w, "role must be 'customer' or 'admin'", http.StatusBadRequest)
-		return
-	}
+	role := "customer"
 
 	user := models.User{
 		Name:     in.Name,

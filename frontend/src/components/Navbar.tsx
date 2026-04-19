@@ -1,7 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 
 function Navbar() {
     const navigate = useNavigate();

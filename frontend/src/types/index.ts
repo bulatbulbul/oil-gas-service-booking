@@ -62,6 +62,7 @@ export type BookingService = {
     BookingID: number;
     CompanyServiceID: number;
     Notes?: string | null;
+    Quantity?: number | null;
     CompanyService?: {
         Company?: { CompanyID: number; Name: string; logo_url?: string | null };
         Service?: { ServiceID: number; Title: string };

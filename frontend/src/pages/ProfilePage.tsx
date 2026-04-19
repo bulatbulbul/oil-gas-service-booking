@@ -1,6 +1,5 @@
 import { useProfile } from "../hooks/useProfile";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 
 function ProfilePage() {
     const {

@@ -47,6 +47,12 @@ type CompanyServiceCreateRequest struct {
 // @Failure 500 {string} string
 // @Router /company-services [post]
 func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
+	userID, role, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var input CompanyServiceCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -62,6 +68,16 @@ func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	company, err := h.companyRepo.GetByID(input.CompanyID)
+	if err != nil {
+		http.Error(w, "company not found", http.StatusNotFound)
+		return
+	}
+	if company.UserID != userID && role != "admin" {
+		http.Error(w, "forbidden: not your company", http.StatusForbidden)
+		return
+	}
+
 	cs := models.CompanyService{
 		CompanyID: input.CompanyID,
 		ServiceID: input.ServiceID,
@@ -73,52 +89,6 @@ func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusCreated)
-	_ = json.NewEncoder(w).Encode(cs)
-}
-
-// GetCompanyServices godoc
-// @Summary Получить все связи компаний и услуг
-// @Tags company-services
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {array} models.CompanyService
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /company-services [get]
-func (h *CompanyServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	data, err := h.repo.GetAll()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	_ = json.NewEncoder(w).Encode(data)
-}
-
-// GetCompanyServiceByID godoc
-// @Summary Получить связь компании и услуги по ID
-// @Tags company-services
-// @Security BasicAuth
-// @Produce json
-// @Param id path int true "CompanyService ID"
-// @Success 200 {object} models.CompanyService
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Router /company-services/{id} [get]
-func (h *CompanyServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
-	if err != nil {
-		http.Error(w, "invalid id", http.StatusBadRequest)
-		return
-	}
-
-	cs, err := h.repo.GetByID(id)
-	if err != nil {
-		http.Error(w, "company service not found", http.StatusNotFound)
-		return
-	}
-
 	_ = json.NewEncoder(w).Encode(cs)
 }
 

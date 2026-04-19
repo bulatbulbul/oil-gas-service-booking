@@ -84,7 +84,7 @@ func (r *BusinessRepo) FindUsersWithActiveBookings() ([]UserWithActiveBookings, 
 		// Подсчитываем активные бронирования
 		activeCount := 0
 		for _, booking := range u.Bookings {
-			if booking.Status == "active" || booking.Status == "requested" {
+			if booking.Status == "requested" || booking.Status == "approved" {
 				activeCount++
 			}
 		}
@@ -96,7 +96,7 @@ func (r *BusinessRepo) FindUsersWithActiveBookings() ([]UserWithActiveBookings, 
 		// Подсчет активных бронирований
 		activeCount := 0
 		for _, booking := range u.Bookings {
-			if booking.Status == "active" || booking.Status == "requested" {
+			if booking.Status == "requested" || booking.Status == "approved" {
 				activeCount++
 			}
 		}

@@ -17,22 +17,22 @@ export function useAdminAnalytics() {
     const [error, setError]                       = useState<string | null>(null);
 
     useEffect(() => {
-        Promise.all([
+        Promise.allSettled([
             getUsersWithActiveBookings(),
             getSummary(),
             getPopularServices(10),
             getPopularCompanies(10),
             getBookingsByDate(),
-        ])
-            .then(([users, sum, popular, companies, byDate]) => {
-                setActiveUsers(users);
-                setSummary(sum);
-                setPopularServices(popular);
-                setPopularCompanies(companies);
-                setBookingsByDate(byDate);
-            })
-            .catch(() => setError("Не удалось загрузить данные"))
-            .finally(() => setLoading(false));
+        ]).then(([users, sum, popular, companies, byDate]) => {
+            if (users.status === "fulfilled")     setActiveUsers(users.value);
+            if (sum.status === "fulfilled")       setSummary(sum.value);
+            if (popular.status === "fulfilled")   setPopularServices(popular.value);
+            if (companies.status === "fulfilled") setPopularCompanies(companies.value);
+            if (byDate.status === "fulfilled")    setBookingsByDate(byDate.value);
+
+            const anyFailed = [users, sum, popular, companies, byDate].some(r => r.status === "rejected");
+            if (anyFailed) setError("Некоторые данные не удалось загрузить");
+        }).finally(() => setLoading(false));
     }, []);
 
     return { activeUsers, summary, popularServices, popularCompanies, bookingsByDate, loading, error };

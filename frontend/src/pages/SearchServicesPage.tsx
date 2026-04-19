@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useSearch } from "../hooks/useSearch";
-
-const BASE_URL = "http://localhost:8082";
+import { BASE_URL } from "../api/client";
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 
 function CompanyCard({ name, logoUrl, onBook }: { name: string; logoUrl?: string | null; onBook: () => void }) {
