@@ -25,17 +25,6 @@ func NewUploadHandler(db *gorm.DB, uploadsDir string) *UploadHandler {
 }
 
 // UploadAvatar godoc
-// @Summary Загрузить аватар пользователя
-// @Tags upload
-// @Security BasicAuth
-// @Accept multipart/form-data
-// @Produce json
-// @Param file formData file true "Изображение (jpg, png, gif, webp)"
-// @Success 200 {object} map[string]string
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /upload/avatar [post]
 func (h *UploadHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -59,20 +48,6 @@ func (h *UploadHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 }
 
 // UploadCompanyLogo godoc
-// @Summary Загрузить логотип компании
-// @Tags upload
-// @Security BasicAuth
-// @Accept multipart/form-data
-// @Produce json
-// @Param id path int true "Company ID"
-// @Param file formData file true "Изображение (jpg, png, gif, webp)"
-// @Success 200 {object} map[string]string
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /upload/companies/{id}/logo [post]
 func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -112,19 +87,6 @@ func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request
 }
 
 // UploadServiceImage godoc
-// @Summary Загрузить фото услуги
-// @Tags upload
-// @Security BasicAuth
-// @Accept multipart/form-data
-// @Produce json
-// @Param id path int true "Service ID"
-// @Param file formData file true "Изображение (jpg, png, gif, webp)"
-// @Success 200 {object} map[string]string
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /services/{id}/image [post]
 func (h *UploadHandler) UploadServiceImage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

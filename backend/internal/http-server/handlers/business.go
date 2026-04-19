@@ -19,13 +19,6 @@ func NewBusinessHandler(businessRepo *repository.BusinessRepo) *BusinessHandler 
 }
 
 // CompaniesByService godoc
-// @Summary Поиск компании по услуге
-// @Tags business
-// @Security BasicAuth
-// @Param service path string true "Service name"
-// @Success 200
-// @Failure 401
-// @Router /business/companies-by-service/{service} [get]
 func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.Request) {
 	serviceID, err := strconv.ParseInt(chi.URLParam(r, "serviceId"), 10, 64)
 	if err != nil {
@@ -44,12 +37,6 @@ func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.
 }
 
 // UsersWithBookings godoc
-// @Summary Пользователи с активными бронированиями
-// @Tags business
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /business/users-with-active-bookings [get]
 func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *http.Request) {
 	users, err := h.businessRepo.FindUsersWithActiveBookings()
 	if err != nil {
@@ -62,12 +49,6 @@ func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *
 }
 
 // CompanyStats godoc
-// @Summary Статистика компаний
-// @Tags business
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /business/company-stats [get]
 func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request) {
 	// Параметры для фильтрации по дате
 	fromStr := r.URL.Query().Get("from")
@@ -107,12 +88,6 @@ func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request
 }
 
 // PopularServices godoc
-// @Summary Популярные услуги
-// @Tags business
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /business/popular-services [get]
 func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Request) {
 	limit := 10
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -133,12 +108,6 @@ func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Req
 }
 
 // GetSummary godoc
-// @Summary Сводная статистика
-// @Tags business
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /business/summary [get]
 func (h *BusinessHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
 	summary, err := h.businessRepo.GetSummary()
 	if err != nil {
@@ -150,14 +119,6 @@ func (h *BusinessHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBookingsByDate godoc
-// @Summary Бронирования по дням
-// @Tags business
-// @Security BasicAuth
-// @Param from query string false "YYYY-MM-DD"
-// @Param to   query string false "YYYY-MM-DD"
-// @Success 200
-// @Failure 401
-// @Router /business/bookings-by-date [get]
 func (h *BusinessHandler) GetBookingsByDate(w http.ResponseWriter, r *http.Request) {
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")
@@ -186,12 +147,6 @@ func (h *BusinessHandler) GetBookingsByDate(w http.ResponseWriter, r *http.Reque
 }
 
 // PopularCompanies godoc
-// @Summary Популярные компании
-// @Tags business
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /business/popular-companies [get]
 func (h *BusinessHandler) FindPopularCompanies(w http.ResponseWriter, r *http.Request) {
 	limit := 10
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -212,13 +167,6 @@ func (h *BusinessHandler) FindPopularCompanies(w http.ResponseWriter, r *http.Re
 }
 
 // Search godoc
-// @Summary  Поиск (компании и услуги)
-// @Tags business
-// @Security BasicAuth
-// @Param q query string true "Search query"
-// @Success 200
-// @Failure 401
-// @Router /business/search [get]
 func (h *BusinessHandler) SearchAll(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {

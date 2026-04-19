@@ -34,18 +34,6 @@ type CompanyServiceCreateRequest struct {
 }
 
 // CreateCompanyService godoc
-// @Summary Создать связь компании и услуги
-// @Tags company-services
-// @Security BasicAuth
-// @Accept json
-// @Produce json
-// @Param data body CompanyServiceCreateRequest true "Данные связи компании и услуги"
-// @Success 201 {object} models.CompanyService
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 500 {string} string
-// @Router /company-services [post]
 func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -93,16 +81,6 @@ func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCompanyServicesByCompanyID godoc
-// @Summary Получить услуги компании
-// @Tags company-services
-// @Security BasicAuth
-// @Produce json
-// @Param company_id path int true "Company ID"
-// @Success 200 {array} models.CompanyService
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Router /companies/{company_id}/services [get]
 func (h *CompanyServiceHandler) GetByCompanyID(w http.ResponseWriter, r *http.Request) {
 	companyID, err := strconv.ParseInt(chi.URLParam(r, "company_id"), 10, 64)
 	if err != nil {
@@ -120,16 +98,6 @@ func (h *CompanyServiceHandler) GetByCompanyID(w http.ResponseWriter, r *http.Re
 }
 
 // GetCompanyServicesByServiceID godoc
-// @Summary Получить компании, предоставляющие услугу
-// @Tags company-services
-// @Security BasicAuth
-// @Produce json
-// @Param service_id path int true "Service ID"
-// @Success 200 {array} models.CompanyService
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Router /services/{service_id}/companies [get]
 func (h *CompanyServiceHandler) GetByServiceID(w http.ResponseWriter, r *http.Request) {
 	serviceID, err := strconv.ParseInt(chi.URLParam(r, "service_id"), 10, 64)
 	if err != nil {
@@ -147,19 +115,6 @@ func (h *CompanyServiceHandler) GetByServiceID(w http.ResponseWriter, r *http.Re
 }
 
 // UpdateCompanyService godoc
-// @Summary Обновить связь компании и услуги
-// @Tags company-services
-// @Security BasicAuth
-// @Accept json
-// @Produce json
-// @Param id path int true "CompanyService ID"
-// @Param data body models.CompanyService true "Данные для обновления"
-// @Success 200 {object} models.CompanyService
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /company-services/{id} [put]
 func (h *CompanyServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -187,16 +142,6 @@ func (h *CompanyServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteCompanyService godoc
-// @Summary Удалить связь компании и услуги
-// @Tags company-services
-// @Security BasicAuth
-// @Param id path int true "CompanyService ID"
-// @Success 204
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /company-services/{id} [delete]
 func (h *CompanyServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -213,14 +158,6 @@ func (h *CompanyServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMyCompanyServices godoc
-// @Summary Получить связи услуг только моих компаний
-// @Tags company-services
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {array} models.CompanyService
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /company-services/my [get]
 func (h *CompanyServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

@@ -42,18 +42,6 @@ func NewServiceHandler(
 }
 
 // CreateService godoc
-// @Summary Создать услугу
-// @Tags services
-// @Security BasicAuth
-// @Accept json
-// @Produce json
-// @Param data body ServiceCreateRequest true "Данные услуги"
-// @Success 201 {object} models.Service
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 500 {string} string
-// @Router /services [post]
 func (h *ServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input ServiceCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -75,12 +63,6 @@ func (h *ServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetServices godoc
-// @Summary Получить все услуги
-// @Tags services
-// @Security BasicAuth
-// @Success 200 {array} models.Service
-// @Failure 401
-// @Router /services [get]
 func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	services, err := h.repo.GetAll()
 	if err != nil {
@@ -92,15 +74,6 @@ func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetService godoc
-// @Summary Получить услугу по ID
-// @Tags services
-// @Security BasicAuth
-// @Param id path int true "Service ID"
-// @Success 200 {object} models.Service
-// @Failure 400
-// @Failure 401
-// @Failure 404
-// @Router /services/{id} [get]
 func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -118,16 +91,6 @@ func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateService godoc
-// @Summary Обновить услугу
-// @Tags services
-// @Security BasicAuth
-// @Param id path int true "Service ID"
-// @Success 200 {object} models.Service
-// @Failure 400
-// @Failure 401
-// @Failure 403
-// @Failure 404
-// @Router /services/{id} [put]
 func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -155,15 +118,6 @@ func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteService godoc
-// @Summary Удалить услугу
-// @Tags services
-// @Security BasicAuth
-// @Param id path int true "Service ID"
-// @Success 204
-// @Failure 400
-// @Failure 401
-// @Failure 403
-// @Router /services/{id} [delete]
 func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -180,12 +134,6 @@ func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetAvailableServices godoc
-// @Summary Получить услуги, доступные для бронирования (привязаны к компаниям)
-// @Tags services
-// @Security BasicAuth
-// @Success 200 {array} models.Service
-// @Failure 401
-// @Router /services/available [get]
 func (h *ServiceHandler) GetAvailable(w http.ResponseWriter, r *http.Request) {
 	services, err := h.serviceRepo.GetAvailable()
 	if err != nil {
@@ -196,14 +144,6 @@ func (h *ServiceHandler) GetAvailable(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMyServices godoc
-// @Summary Получить услуги моих компаний
-// @Tags services
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {array} models.Service
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /services/my [get]
 func (h *ServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

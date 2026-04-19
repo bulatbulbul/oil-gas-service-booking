@@ -41,16 +41,6 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 }
 
 // Register godoc
-// @Summary Регистрация пользователя
-// @Description Создание нового пользователя
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param data body RegisterRequest true "Данные пользователя"
-// @Success 201 {object} TokenResponse
-// @Failure 400 {string} string
-// @Failure 500 {string} string
-// @Router /auth/register [post]
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var in RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -119,15 +109,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 // Login godoc
-// @Summary Авторизация
-// @Description Вход по email и паролю. Возвращает JWT токен
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param data body LoginRequest true "Email и пароль"
-// @Success 200 {object} TokenResponse
-// @Failure 401 {string} string
-// @Router /auth/login [post]
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var in LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -178,14 +159,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Me godoc
-// @Summary Текущий пользователь
-// @Description Возвращает данные текущего пользователя по JWT
-// @Tags auth
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {object} map[string]interface{}
-// @Failure 401 {string} string
-// @Router /auth/me [get]
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -210,10 +183,6 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateMe godoc
-// @Summary Обновить профиль
-// @Tags auth
-// @Security BasicAuth
-// @Router /auth/me [patch]
 func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -262,10 +231,6 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 }
 
 // MyStats godoc
-// @Summary Статистика текущего пользователя
-// @Tags auth
-// @Security BasicAuth
-// @Router /auth/me/stats [get]
 func (h *AuthHandler) MyStats(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

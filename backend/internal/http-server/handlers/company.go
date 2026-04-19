@@ -21,17 +21,6 @@ func NewCompanyHandler(repo *repository.CompanyRepository) *CompanyHandler {
 }
 
 // CreateCompany godoc
-// @Summary Create company
-// @Tags companies
-// @Security BasicAuth
-// @Accept json
-// @Produce json
-// @Param data body models.Company true "Company data"
-// @Success 201 {object} models.Company
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /companies [post]
 func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -63,13 +52,6 @@ func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCompanies godoc
-// @Summary Get all companies
-// @Tags companies
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {array} models.Company
-// @Failure 500 {string} string
-// @Router /companies [get]
 func (h *CompanyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	data, err := h.repo.GetAll()
 	if err != nil {
@@ -81,16 +63,6 @@ func (h *CompanyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCompany godoc
-// @Summary Get company by ID
-// @Tags companies
-// @Security BasicAuth
-// @Produce json
-// @Param id path int true "Company ID"
-// @Success 200 {object} models.Company
-// @Failure 400 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /companies/{id} [get]
 func (h *CompanyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -108,20 +80,6 @@ func (h *CompanyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateCompany godoc
-// @Summary Update company
-// @Tags companies
-// @Security BasicAuth
-// @Accept json
-// @Produce json
-// @Param id path int true "Company ID"
-// @Param company body models.Company true "Company"
-// @Success 200 {object} models.Company
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 404 {string} string
-// @Failure 500 {string} string
-// @Router /companies/{id} [put]
 func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -169,16 +127,6 @@ func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteCompany godoc
-// @Summary Delete company
-// @Tags companies
-// @Security BasicAuth
-// @Param id path int true "Company ID"
-// @Success 204
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 500 {string} string
-// @Router /companies/{id} [delete]
 func (h *CompanyHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -212,14 +160,6 @@ func (h *CompanyHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMyCompanies godoc
-// @Summary Get my companies
-// @Tags companies
-// @Security BasicAuth
-// @Produce json
-// @Success 200 {array} models.Company
-// @Failure 401 {string} string
-// @Failure 500 {string} string
-// @Router /companies/my [get]
 func (h *CompanyHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

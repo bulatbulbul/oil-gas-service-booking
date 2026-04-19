@@ -34,19 +34,6 @@ type CreateBookingRequest struct {
 }
 
 // CreateBooking godoc
-// @Summary Создать бронирование
-// @Description Создание нового бронирования
-// @Tags bookings
-// @Accept json
-// @Produce json
-// @Param data body BookingCreateRequest true "Данные бронирования"
-// @Success 201 {object} models.Booking
-// @Failure 400 {string} string
-// @Failure 401 {string} string
-// @Failure 403 {string} string
-// @Failure 500 {string} string
-// @Security BasicAuth
-// @Router /bookings [post]
 func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input BookingCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -99,12 +86,6 @@ func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBookings godoc
-// @Summary Получить бронирования
-// @Tags bookings
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /bookings [get]
 func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	// только админ, это уже настроено в router.go
 
@@ -137,12 +118,6 @@ func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMyBookings godoc
-// @Summary Получить бронирования текущего пользователя
-// @Tags bookings
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /bookings/me [get]
 func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -160,13 +135,6 @@ func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetBooking godoc
-// @Summary Получить бронирование
-// @Tags bookings
-// @Security BasicAuth
-// @Param id path int true "Booking ID"
-// @Success 200
-// @Failure 401
-// @Router /bookings/{id} [get]
 func (h *BookingHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
@@ -180,14 +148,6 @@ func (h *BookingHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateBooking godoc
-// @Summary Обновить бронирование
-// @Tags bookings
-// @Security BasicAuth
-// @Param id path int true "Booking ID"
-// @Success 200
-// @Failure 401
-// @Failure 403
-// @Router /bookings/{id} [put]
 func (h *BookingHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
@@ -211,14 +171,6 @@ func (h *BookingHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 // DeleteBooking godoc
-// @Summary Удалить бронирование
-// @Tags bookings
-// @Security BasicAuth
-// @Param id path int true "Booking ID"
-// @Success 204
-// @Failure 401
-// @Failure 403
-// @Router /bookings/{id} [delete]
 func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 
@@ -231,12 +183,6 @@ func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetMyCompanyBookings godoc
-// @Summary Получить бронирования услуг моих компаний
-// @Tags bookings
-// @Security BasicAuth
-// @Success 200
-// @Failure 401
-// @Router /bookings/company [get]
 func (h *BookingHandler) GetMyCompanyBookings(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -254,14 +200,6 @@ func (h *BookingHandler) GetMyCompanyBookings(w http.ResponseWriter, r *http.Req
 }
 
 // UpdateMyCompanyBookingStatus godoc
-// @Summary Обновить статус бронирования (для владельца компании)
-// @Tags bookings
-// @Security BasicAuth
-// @Param id path int true "Booking ID"
-// @Success 200
-// @Failure 401
-// @Failure 403
-// @Router /bookings/{id}/company-status [put]
 func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -314,15 +252,6 @@ func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *
 }
 
 // CancelMy godoc
-// @Summary Отменить своё бронирование (статус → cancelled)
-// @Tags bookings
-// @Security BasicAuth
-// @Param id path int true "Booking ID"
-// @Success 200
-// @Failure 400
-// @Failure 401
-// @Failure 403
-// @Router /bookings/{id}/cancel [put]
 func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
