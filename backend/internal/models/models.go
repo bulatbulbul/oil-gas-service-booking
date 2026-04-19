@@ -51,6 +51,7 @@ type User struct {
 	Email     *string   `gorm:"column:email;uniqueIndex"`
 	Password  string    `gorm:"column:password;not null"`
 	Role      string    `gorm:"column:role;default:'customer'"`
+	AvatarURL *string   `gorm:"column:avatar_url"`
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 

@@ -74,7 +74,7 @@ func (h *UploadHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 // @Failure 500 {string} string
 // @Router /upload/companies/{id}/logo [post]
 func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request) {
-	userID, _, ok := authmw.GetUserFromContext(r)
+	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return
@@ -91,7 +91,7 @@ func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request
 		http.Error(w, "company not found", http.StatusNotFound)
 		return
 	}
-	if company.UserID != userID {
+	if company.UserID != userID && role != "admin" {
 		http.Error(w, "forbidden: not your company", http.StatusForbidden)
 		return
 	}

@@ -72,7 +72,7 @@ function Navbar() {
                             borderBottom: location.pathname.startsWith("/admin") ? "1px solid #000" : "1px solid transparent",
                         }}
                     >
-                        Администратор
+                        Панель управления
                     </Link>
                 )}
 
@@ -92,8 +92,8 @@ function Navbar() {
                 >
                     <div
                         style={{
-                            width: 28,
-                            height: 28,
+                            width: 36,
+                            height: 36,
                             background: "#000",
                             borderRadius: 3,
                             overflow: "hidden",
@@ -101,7 +101,7 @@ function Navbar() {
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
-                            boxShadow: isProfileActive ? "0 0 0 2px #000, 0 0 0 4px #fff" : "none",
+                            boxShadow: "0 0 0 2px #000, 0 0 0 4px #fff",
                             transition: "box-shadow 0.15s",
                         }}
                     >
@@ -112,7 +112,7 @@ function Navbar() {
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                             />
                         ) : (
-                            <span style={{ color: "#fff", fontSize: 10, fontWeight: 700, letterSpacing: "0.5px" }}>
+                            <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, letterSpacing: "0.5px" }}>
                                 {initials}
                             </span>
                         )}

@@ -23,6 +23,8 @@ export function useSearch() {
     const [bookingToast, setBookingToast] = useState<BookingToast | null>(null);
     const [requestSent, setRequestSent] = useState(false);
     const [requestSending, setRequestSending] = useState(false);
+    const [pendingCompany, setPendingCompany] = useState<CompanyServiceResult | null>(null);
+    const [booking, setBooking] = useState(false);
 
     useEffect(() => {
         getAvailableServices()
@@ -34,13 +36,13 @@ export function useSearch() {
         ? allServices.filter((s) => s.Title.toLowerCase().includes(filter.toLowerCase()))
         : allServices;
 
-    async function selectService(title: string) {
-        setSelectedService(title);
+    async function selectService(service: Service) {
+        setSelectedService(service.Title);
         setError(null);
         setResults([]);
         try {
             setResultsLoading(true);
-            const data = await getCompaniesByService(title);
+            const data = await getCompaniesByService(service.ServiceID);
             setResults(data);
         } catch {
             setError("Нет компаний, предоставляющих эту услугу");
@@ -73,19 +75,21 @@ export function useSearch() {
         setFilter("");
     }
 
-    async function handleBook(company: CompanyServiceResult) {
+    async function handleBook(comment: string) {
+        if (!pendingCompany) return;
         try {
+            setBooking(true);
             setError(null);
-            const booking = await createBooking(
-                `Бронирование услуги "${selectedService}" в компании "${company.Name}"`,
-                "requested"
-            );
-            await createBookingService(booking.BookingID, company.CompanyServiceID);
-            setBookingToast({ bookingId: booking.BookingID, companyName: company.Name });
+            const created = await createBooking(comment.trim() || null, "requested");
+            await createBookingService(created.BookingID, pendingCompany.CompanyServiceID);
+            setBookingToast({ bookingId: created.BookingID, companyName: pendingCompany.Name });
             setResults([]);
             setSelectedService(null);
+            setPendingCompany(null);
         } catch {
             setError("Не удалось создать бронирование");
+        } finally {
+            setBooking(false);
         }
     }
 
@@ -103,6 +107,9 @@ export function useSearch() {
         setBookingToast,
         requestSent,
         requestSending,
+        pendingCompany,
+        setPendingCompany,
+        booking,
         selectService,
         clearSelection,
         handleBook,

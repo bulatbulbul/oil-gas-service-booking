@@ -23,8 +23,6 @@ export async function updateService(id: number, title: string): Promise<void> {
 export async function uploadServiceImage(id: number, file: File): Promise<{ image_url: string }> {
     const form = new FormData();
     form.append("file", file);
-    const res = await api.post(`/services/${id}/image`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await api.post(`/services/${id}/image`, form);
     return res.data;
 }

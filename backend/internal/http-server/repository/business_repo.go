@@ -42,27 +42,21 @@ type CompanyServiceSearchResult struct {
 	LogoURL          *string `json:"LogoURL"`
 }
 
-func (r *BusinessRepo) FindCompaniesByService(serviceTitle string) ([]CompanyServiceSearchResult, error) {
-	// Получаем все компании с их услугами
-	var companies []models.Company
-	err := r.db.Preload("CompanyServices.Service").Find(&companies).Error
+func (r *BusinessRepo) FindCompaniesByServiceID(serviceID int64) ([]CompanyServiceSearchResult, error) {
+	var companySvcs []models.CompanyService
+	err := r.db.Where("service_id = ?", serviceID).Preload("Company").Find(&companySvcs).Error
 	if err != nil {
 		return nil, err
 	}
 
-	var results []CompanyServiceSearchResult
-
-	for _, c := range companies {
-		for _, cs := range c.CompanyServices {
-			if cs.Service.Title == serviceTitle {
-				results = append(results, CompanyServiceSearchResult{
-					CompanyID:        c.CompanyID,
-					Name:             c.Name,
-					CompanyServiceID: cs.CompanyServiceID,
-					LogoURL:          c.LogoURL,
-				})
-			}
-		}
+	results := make([]CompanyServiceSearchResult, 0, len(companySvcs))
+	for _, cs := range companySvcs {
+		results = append(results, CompanyServiceSearchResult{
+			CompanyID:        cs.Company.CompanyID,
+			Name:             cs.Company.Name,
+			CompanyServiceID: cs.CompanyServiceID,
+			LogoURL:          cs.Company.LogoURL,
+		})
 	}
 
 	return results, nil
@@ -232,7 +226,99 @@ func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) 
 	return serviceStats, nil
 }
 
-// 5. Поиск по всем полям (компании и услуги)
+// 5. Сводная статистика
+type Summary struct {
+	TotalBookings     int64 `json:"total_bookings"`
+	ActiveBookings    int64 `json:"active_bookings"`
+	TotalCompanies    int64 `json:"total_companies"`
+	AvailableServices int64 `json:"available_services"`
+}
+
+func (r *BusinessRepo) GetSummary() (*Summary, error) {
+	var total, active, companies, services int64
+	if err := r.db.Model(&models.Booking{}).Count(&total).Error; err != nil {
+		return nil, err
+	}
+	if err := r.db.Model(&models.Booking{}).Where("status IN ?", []string{"requested", "approved"}).Count(&active).Error; err != nil {
+		return nil, err
+	}
+	if err := r.db.Model(&models.Company{}).Count(&companies).Error; err != nil {
+		return nil, err
+	}
+	if err := r.db.Raw("SELECT COUNT(DISTINCT service_id) FROM company_service").Scan(&services).Error; err != nil {
+		return nil, err
+	}
+	return &Summary{
+		TotalBookings:     total,
+		ActiveBookings:    active,
+		TotalCompanies:    companies,
+		AvailableServices: services,
+	}, nil
+}
+
+// 6. Бронирования по дням
+type BookingByDate struct {
+	Date  string `json:"date"`
+	Count int    `json:"count"`
+}
+
+func (r *BusinessRepo) GetBookingsByDate(from, to time.Time) ([]BookingByDate, error) {
+	var rows []BookingByDate
+	err := r.db.Model(&models.Booking{}).
+		Select("DATE(created_at) as date, COUNT(*) as count").
+		Where("created_at >= ? AND created_at < ?", from, to.Add(24*time.Hour)).
+		Group("DATE(created_at)").
+		Order("date").
+		Scan(&rows).Error
+	return rows, err
+}
+
+// 7. Популярные компании
+type PopularCompany struct {
+	CompanyID    int64   `json:"company_id"`
+	Name         string  `json:"name"`
+	LogoURL      *string `json:"logo_url"`
+	BookingCount int     `json:"booking_count"`
+}
+
+func (r *BusinessRepo) FindPopularCompanies(limit int) ([]PopularCompany, error) {
+	var companies []models.Company
+	err := r.db.Preload("CompanyServices.BookingServices").Find(&companies).Error
+	if err != nil {
+		return nil, err
+	}
+
+	stats := Select(companies, func(c models.Company) PopularCompany {
+		count := 0
+		for _, cs := range c.CompanyServices {
+			count += len(cs.BookingServices)
+		}
+		return PopularCompany{
+			CompanyID:    c.CompanyID,
+			Name:         c.Name,
+			LogoURL:      c.LogoURL,
+			BookingCount: count,
+		}
+	})
+
+	filtered := Where(stats, func(s PopularCompany) bool { return s.BookingCount > 0 })
+
+	for i := 0; i < len(filtered); i++ {
+		for j := i + 1; j < len(filtered); j++ {
+			if filtered[j].BookingCount > filtered[i].BookingCount {
+				filtered[i], filtered[j] = filtered[j], filtered[i]
+			}
+		}
+	}
+
+	if limit > 0 && limit < len(filtered) {
+		filtered = filtered[:limit]
+	}
+
+	return filtered, nil
+}
+
+// 8. Поиск по всем полям (компании и услуги)
 type SearchResult struct {
 	Type        string `json:"type"` // "company" или "service"
 	ID          int64  `json:"id"`

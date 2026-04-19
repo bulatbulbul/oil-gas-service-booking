@@ -27,16 +27,15 @@ func NewBusinessHandler(businessRepo *repository.BusinessRepo) *BusinessHandler 
 // @Failure 401
 // @Router /business/companies-by-service/{service} [get]
 func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.Request) {
-	service := chi.URLParam(r, "service")
-
-	companies, err := h.businessRepo.FindCompaniesByService(service)
+	serviceID, err := strconv.ParseInt(chi.URLParam(r, "serviceId"), 10, 64)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "invalid service id", http.StatusBadRequest)
 		return
 	}
 
-	if len(companies) == 0 {
-		http.Error(w, "No companies found for this service", http.StatusNotFound)
+	companies, err := h.businessRepo.FindCompaniesByServiceID(serviceID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -131,6 +130,85 @@ func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Req
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(services)
+}
+
+// GetSummary godoc
+// @Summary Сводная статистика
+// @Tags business
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /business/summary [get]
+func (h *BusinessHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
+	summary, err := h.businessRepo.GetSummary()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(summary)
+}
+
+// GetBookingsByDate godoc
+// @Summary Бронирования по дням
+// @Tags business
+// @Security BasicAuth
+// @Param from query string false "YYYY-MM-DD"
+// @Param to   query string false "YYYY-MM-DD"
+// @Success 200
+// @Failure 401
+// @Router /business/bookings-by-date [get]
+func (h *BusinessHandler) GetBookingsByDate(w http.ResponseWriter, r *http.Request) {
+	fromStr := r.URL.Query().Get("from")
+	toStr := r.URL.Query().Get("to")
+
+	to := time.Now()
+	from := to.AddDate(0, 0, -29)
+
+	if fromStr != "" {
+		if t, err := time.Parse("2006-01-02", fromStr); err == nil {
+			from = t
+		}
+	}
+	if toStr != "" {
+		if t, err := time.Parse("2006-01-02", toStr); err == nil {
+			to = t
+		}
+	}
+
+	rows, err := h.businessRepo.GetBookingsByDate(from, to)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rows)
+}
+
+// PopularCompanies godoc
+// @Summary Популярные компании
+// @Tags business
+// @Security BasicAuth
+// @Success 200
+// @Failure 401
+// @Router /business/popular-companies [get]
+func (h *BusinessHandler) FindPopularCompanies(w http.ResponseWriter, r *http.Request) {
+	limit := 10
+	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
+		l, err := strconv.Atoi(limitStr)
+		if err == nil && l > 0 {
+			limit = l
+		}
+	}
+
+	companies, err := h.businessRepo.FindPopularCompanies(limit)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(companies)
 }
 
 // Search godoc

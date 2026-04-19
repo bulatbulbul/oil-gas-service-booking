@@ -21,8 +21,8 @@ export async function getBookingsByUser(userId: number): Promise<Booking[]> {
     return Array.isArray(res.data) ? res.data : [];
 }
 
-export async function createBooking(description: string, status: string): Promise<Booking> {
-    const res = await api.post("/bookings", { description, status });
+export async function createBooking(description: string | null | undefined, status: string): Promise<Booking> {
+    const res = await api.post("/bookings", { description: description || null, status });
     return res.data;
 }
 

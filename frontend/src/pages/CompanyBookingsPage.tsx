@@ -2,6 +2,8 @@ import { useCompanyBookings } from "../hooks/useCompanyBookings";
 import StatusBadge from "../components/StatusBadge";
 import { BOOKING_STATUSES, BOOKING_STATUS_LABELS } from "../types";
 
+const BASE_URL = "http://localhost:8082";
+
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 
 const NEXT_STATUSES: Record<string, string[]> = {
@@ -119,11 +121,12 @@ function CompanyBookingsPage() {
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                     {filtered.map((b) => {
                         const nextStatuses = NEXT_STATUSES[b.Status] ?? [];
-                        const companies = [...new Set(
-                            (b.BookingServices ?? [])
-                                .map((bs) => bs.CompanyService?.Company?.Name)
-                                .filter(Boolean)
-                        )];
+                        const companiesMap = new Map<number, { CompanyID: number; Name: string; logo_url?: string | null }>();
+                        (b.BookingServices ?? []).forEach(bs => {
+                            const c = bs.CompanyService?.Company;
+                            if (c) companiesMap.set(c.CompanyID, c);
+                        });
+                        const companies = [...companiesMap.values()];
 
                         return (
                             <div
@@ -160,10 +163,23 @@ function CompanyBookingsPage() {
                                         </div>
                                         {companies.length > 0 && (
                                             <div>
-                                                <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Компания</div>
-                                                {companies.map((c) => (
-                                                    <div key={c} style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{c}</div>
-                                                ))}
+                                                <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>Компания</div>
+                                                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                                                    {companies.map((c) => (
+                                                        <div key={c.CompanyID} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                            <div style={{ width: 36, height: 36, borderRadius: 4, overflow: "hidden", flexShrink: 0, border: "1px solid #e8e8e8" }}>
+                                                                {c.logo_url ? (
+                                                                    <img src={`${BASE_URL}${c.logo_url}`} alt={c.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                                                                ) : (
+                                                                    <div style={{ width: "100%", height: "100%", background: "#111", display: "flex", alignItems: "center", justifyContent: "center", color: "#fff", fontWeight: 700, fontSize: 14 }}>
+                                                                        {c.Name.trim()[0]?.toUpperCase()}
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div style={{ fontSize: 14, fontWeight: 600, color: "#111" }}>{c.Name}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
                                         )}
                                     </div>

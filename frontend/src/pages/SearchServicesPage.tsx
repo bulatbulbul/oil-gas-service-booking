@@ -82,11 +82,13 @@ function SearchServicesPage() {
         selectedService, results, resultsLoading,
         error, bookingToast, setBookingToast,
         requestSent, requestSending,
+        pendingCompany, setPendingCompany, booking,
         selectService, clearSelection, handleBook,
         submitRequest, resetRequest,
     } = useSearch();
 
     const [comment, setComment] = useState("");
+    const [bookingComment, setBookingComment] = useState("");
 
     useEffect(() => {
         if (!bookingToast) return;
@@ -136,7 +138,7 @@ function SearchServicesPage() {
                                         key={company.CompanyServiceID}
                                         name={company.Name}
                                         logoUrl={company.LogoURL}
-                                        onBook={() => handleBook(company)}
+                                        onBook={() => { setBookingComment(""); setPendingCompany(company); }}
                                     />
                                 ))}
                             </div>
@@ -273,11 +275,60 @@ function SearchServicesPage() {
                     ) : (
                         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 10 }}>
                             {filteredServices.map((svc) => (
-                                <ServiceCard key={svc.ServiceID} title={svc.Title} onClick={() => selectService(svc.Title)} />
+                                <ServiceCard key={svc.ServiceID} title={svc.Title} onClick={() => selectService(svc)} />
                             ))}
                         </div>
                     )}
                 </>
+            )}
+
+            {/* Модалка подтверждения бронирования */}
+            {pendingCompany && (
+                <div
+                    style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}
+                    onClick={() => setPendingCompany(null)}
+                >
+                    <div
+                        style={{ background: "#fff", borderRadius: 8, padding: "28px 32px", width: 420, boxShadow: "0 12px 40px rgba(0,0,0,0.18)" }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div style={{ fontSize: 16, fontWeight: 700, color: "#000", marginBottom: 4 }}>Забронировать услугу</div>
+                        <div style={{ fontSize: 13, color: "#666", marginBottom: 20 }}>
+                            {selectedService} · <span style={{ color: "#000", fontWeight: 600 }}>{pendingCompany.Name}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "#888", marginBottom: 6 }}>Комментарий <span style={{ color: "#bbb" }}>(необязательно)</span></div>
+                        <textarea
+                            value={bookingComment}
+                            onChange={e => setBookingComment(e.target.value)}
+                            placeholder="Опишите детали заявки..."
+                            rows={4}
+                            autoFocus
+                            style={{ width: "100%", padding: "10px 12px", border: "1px solid #e0e0e0", borderRadius: 6, fontSize: 13, fontFamily: "inherit", resize: "vertical", outline: "none", boxSizing: "border-box", marginBottom: 20, color: "#000" }}
+                            onFocus={e => (e.currentTarget.style.borderColor = "#000")}
+                            onBlur={e => (e.currentTarget.style.borderColor = "#e0e0e0")}
+                        />
+                        <div style={{ display: "flex", gap: 8 }}>
+                            <button
+                                onClick={() => handleBook(bookingComment)}
+                                disabled={booking}
+                                style={{ flex: 1, padding: "10px 0", background: "#000", color: "#fff", border: "none", borderRadius: 4, fontSize: 13, fontWeight: 600, cursor: booking ? "default" : "pointer", fontFamily: "inherit", opacity: booking ? 0.6 : 1 }}
+                                onMouseEnter={e => { if (!booking) e.currentTarget.style.background = "#222"; }}
+                                onMouseLeave={e => (e.currentTarget.style.background = "#000")}
+                            >
+                                {booking ? "Отправка..." : "Забронировать"}
+                            </button>
+                            <button
+                                onClick={() => setPendingCompany(null)}
+                                disabled={booking}
+                                style={{ flex: 1, padding: "10px 0", background: "#fff", color: "#000", border: "1px solid #e8e8e8", borderRadius: 4, fontSize: 13, cursor: "pointer", fontFamily: "inherit" }}
+                                onMouseEnter={e => (e.currentTarget.style.borderColor = "#000")}
+                                onMouseLeave={e => (e.currentTarget.style.borderColor = "#e8e8e8")}
+                            >
+                                Отмена
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Toast */}

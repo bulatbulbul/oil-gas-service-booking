@@ -208,9 +208,87 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
-		"id":    user.UserID,
-		"name":  user.Name,
-		"email": user.Email, // это *string, нормально отдастся как строка/ null
-		"role":  role,
+		"id":         user.UserID,
+		"name":       user.Name,
+		"email":      user.Email,
+		"role":       role,
+		"avatar_url": user.AvatarURL,
+	})
+}
+
+// UpdateMe godoc
+// @Summary Обновить профиль
+// @Tags auth
+// @Security BasicAuth
+// @Router /auth/me [patch]
+func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
+	userID, role, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var in struct {
+		Name  string  `json:"name"`
+		Email *string `json:"email"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	updates := map[string]interface{}{}
+	if in.Name != "" {
+		updates["name"] = in.Name
+	}
+	if in.Email != nil {
+		updates["email"] = in.Email
+	}
+
+	if len(updates) == 0 {
+		http.Error(w, "nothing to update", http.StatusBadRequest)
+		return
+	}
+
+	if err := h.db.Model(&models.User{}).Where("user_id = ?", userID).Updates(updates).Error; err != nil {
+		http.Error(w, "failed to update user", http.StatusInternalServerError)
+		return
+	}
+
+	var user models.User
+	h.db.First(&user, userID)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"id":         user.UserID,
+		"name":       user.Name,
+		"email":      user.Email,
+		"role":       role,
+		"avatar_url": user.AvatarURL,
+	})
+}
+
+// MyStats godoc
+// @Summary Статистика текущего пользователя
+// @Tags auth
+// @Security BasicAuth
+// @Router /auth/me/stats [get]
+func (h *AuthHandler) MyStats(w http.ResponseWriter, r *http.Request) {
+	userID, _, ok := authmw.GetUserFromContext(r)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var total, active, completed int64
+	h.db.Model(&models.Booking{}).Where("user_id = ?", userID).Count(&total)
+	h.db.Model(&models.Booking{}).Where("user_id = ? AND status IN ?", userID, []string{"requested", "approved"}).Count(&active)
+	h.db.Model(&models.Booking{}).Where("user_id = ? AND status = ?", userID, "completed").Count(&completed)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"total_bookings":     total,
+		"active_bookings":    active,
+		"completed_bookings": completed,
 	})
 }

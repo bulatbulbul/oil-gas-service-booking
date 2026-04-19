@@ -45,7 +45,6 @@ function AdminUsersPage() {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                         <thead>
                         <tr>
-                            <th style={{ ...thStyle, width: 60 }}>ID</th>
                             <th style={thStyle}>Имя</th>
                             <th style={thStyle}>Email</th>
                             <th style={{ ...thStyle, width: 100 }}>Роль</th>
@@ -55,7 +54,6 @@ function AdminUsersPage() {
                         <tbody>
                         {users.map((u) => (
                             <tr key={u.UserID}>
-                                <td style={{ ...tdStyle, color: "#999", fontVariantNumeric: "tabular-nums" }}>{u.UserID}</td>
                                 <td style={{ ...tdStyle, fontWeight: 500 }}>{u.Name}</td>
                                 <td style={{ ...tdStyle, color: "#666" }}>{u.Email || "—"}</td>
                                 <td style={tdStyle}>

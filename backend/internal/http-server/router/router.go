@@ -32,7 +32,7 @@ func NewRouter(
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:5173"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
@@ -46,6 +46,8 @@ func NewRouter(
 	})
 
 	r.With(authmw.BasicAuthMiddleware(false)).Get("/auth/me", authHandler.Me)
+	r.With(authmw.BasicAuthMiddleware(false)).Patch("/auth/me", authHandler.UpdateMe)
+	r.With(authmw.BasicAuthMiddleware(false)).Get("/auth/me/stats", authHandler.MyStats)
 
 	// ------------ COMPANIES (любой залогиненный) ------------
 	// companies
@@ -123,6 +125,7 @@ func NewRouter(
 
 	// ------------ UPLOAD ------------
 	r.Route("/upload", func(r chi.Router) {
+		r.With(authmw.BasicAuthMiddleware(false)).Post("/avatar", uploadHandler.UploadAvatar)
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/companies/{id}/logo", uploadHandler.UploadCompanyLogo)
 	})
 
@@ -138,12 +141,15 @@ func NewRouter(
 	// ------------ BUSINESS (аналитика) ------------
 	r.Route("/business", func(r chi.Router) {
 		// поиск компаний по услуге: любой залогиненный
-		r.With(authmw.BasicAuthMiddleware(false)).Get("/companies-by-service/{service}", businessHandler.FindCompaniesByService)
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/companies-by-service/{serviceId}", businessHandler.FindCompaniesByService)
 
 		// аналитика: только admin
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/users-with-active-bookings", businessHandler.FindUsersWithActiveBookings)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/company-stats", businessHandler.GetCompanyStats)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/popular-services", businessHandler.FindPopularServices)
+		r.With(authmw.BasicAuthMiddleware(true)).Get("/popular-companies", businessHandler.FindPopularCompanies)
+		r.With(authmw.BasicAuthMiddleware(true)).Get("/summary", businessHandler.GetSummary)
+		r.With(authmw.BasicAuthMiddleware(true)).Get("/bookings-by-date", businessHandler.GetBookingsByDate)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/search", businessHandler.SearchAll)
 	})
 

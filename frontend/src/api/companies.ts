@@ -6,6 +6,11 @@ export async function getMyCompanies(): Promise<Company[]> {
     return Array.isArray(res.data) ? res.data : [];
 }
 
+export async function getAllCompanies(): Promise<Company[]> {
+    const res = await api.get("/companies");
+    return Array.isArray(res.data) ? res.data : [];
+}
+
 export async function createCompany(name: string): Promise<Company> {
     const res = await api.post("/companies", { name });
     return res.data;
@@ -22,8 +27,6 @@ export async function deleteCompany(id: number): Promise<void> {
 export async function uploadCompanyLogo(id: number, file: File): Promise<{ logo_url: string }> {
     const form = new FormData();
     form.append("file", file);
-    const res = await api.post(`/upload/companies/${id}/logo`, form, {
-        headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await api.post(`/upload/companies/${id}/logo`, form);
     return res.data;
 }

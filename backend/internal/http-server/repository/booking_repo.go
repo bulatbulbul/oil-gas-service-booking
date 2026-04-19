@@ -19,7 +19,12 @@ func (r *BookingRepo) Create(b *models.Booking) error {
 
 func (r *BookingRepo) GetAll() ([]models.Booking, error) {
 	var list []models.Booking
-	err := r.db.Find(&list).Error
+	err := r.db.
+		Preload("User").
+		Preload("BookingServices.CompanyService.Company").
+		Preload("BookingServices.CompanyService.Service").
+		Order("created_at DESC").
+		Find(&list).Error
 	return list, err
 }
 
