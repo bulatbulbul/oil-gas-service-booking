@@ -19,6 +19,7 @@ import AdminServiceRequestsPage from "./pages/AdminServiceRequestsPage";
 import AdminCompaniesPage from "./pages/AdminCompaniesPage";
 import AdminAllBookingsPage from "./pages/AdminAllBookingsPage";
 import CompanyBookingsPage from "./pages/CompanyBookingsPage";
+import NotificationsPage from "./pages/NotificationsPage";
 import HomePage from "./pages/HomePage";
 import Navbar from "./components/Navbar";
 
@@ -98,6 +99,7 @@ function App() {
                     <Route path="/bookings/company" element={<PrivateRoute><CompanyBookingsPage /></PrivateRoute>} />
                     <Route path="/search" element={<PrivateRoute><SearchServicesPage /></PrivateRoute>} />
                     <Route path="/my-services" element={<PrivateRoute><MyServicesPage /></PrivateRoute>} />
+                    <Route path="/notifications" element={<PrivateRoute><NotificationsPage /></PrivateRoute>} />
 
                     <Route path="*" element={<HomePage />} />
                 </Routes>

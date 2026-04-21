@@ -43,6 +43,8 @@ func NewGorm(dsn string) (*gorm.DB, error) {
 		&models.Booking{},
 		&models.BookingService{},
 		&models.ServiceRequest{},
+		&models.Notification{},
+		&models.ServiceRequestResponse{},
 	); err != nil {
 		sqlDB.Close()
 		return nil, fmt.Errorf("automigrate: %w", err)

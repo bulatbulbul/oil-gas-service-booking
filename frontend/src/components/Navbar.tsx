@@ -1,6 +1,8 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useUser } from "../context/UserContext";
 import { BASE_URL } from "../api/client";
+import { getUnreadCount } from "../api/notifications";
 
 function Navbar() {
     const navigate = useNavigate();
@@ -13,11 +15,22 @@ function Navbar() {
         navigate("/login");
     }
 
+    const [unreadCount, setUnreadCount] = useState(0);
+
     const token = localStorage.getItem("authToken");
     const role = localStorage.getItem("userRole");
 
     const isAuth = !!token;
     const isAdmin = role === "admin";
+
+    useEffect(() => {
+        if (!token) return;
+        getUnreadCount().then(setUnreadCount).catch(() => {});
+        const interval = setInterval(() => {
+            getUnreadCount().then(setUnreadCount).catch(() => {});
+        }, 30000);
+        return () => clearInterval(interval);
+    }, [token]);
 
     if (!isAuth) return null;
 
@@ -74,6 +87,30 @@ function Navbar() {
                         Панель управления
                     </Link>
                 )}
+
+                {/* Уведомления */}
+                <Link
+                    to="/notifications"
+                    title="Уведомления"
+                    style={{ position: "relative", display: "flex", alignItems: "center", color: location.pathname === "/notifications" ? "#000" : "#666", textDecoration: "none" }}
+                >
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path d="M9 1.5A5.25 5.25 0 0 0 3.75 6.75c0 2.625-.75 3.75-1.5 4.5h13.5c-.75-.75-1.5-1.875-1.5-4.5A5.25 5.25 0 0 0 9 1.5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
+                        <path d="M7.5 15a1.5 1.5 0 0 0 3 0" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round"/>
+                    </svg>
+                    {unreadCount > 0 && (
+                        <span style={{
+                            position: "absolute", top: -4, right: -6,
+                            minWidth: 16, height: 16, borderRadius: 8,
+                            background: "#000", color: "#fff",
+                            fontSize: 10, fontWeight: 700,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            padding: "0 3px",
+                        }}>
+                            {unreadCount > 99 ? "99+" : unreadCount}
+                        </span>
+                    )}
+                </Link>
 
                 {/* Avatar link to profile */}
                 <Link

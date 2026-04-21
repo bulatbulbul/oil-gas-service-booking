@@ -7,16 +7,18 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 	"oil-gas-service-booking/internal/http-server/repository"
 	"oil-gas-service-booking/internal/models"
 )
 
 type BookingHandler struct {
 	repo *repository.BookingRepo
+	db   *gorm.DB
 }
 
-func NewBookingHandler(repo *repository.BookingRepo) *BookingHandler {
-	return &BookingHandler{repo: repo}
+func NewBookingHandler(repo *repository.BookingRepo, db *gorm.DB) *BookingHandler {
+	return &BookingHandler{repo: repo, db: db}
 }
 
 // BookingServiceItemRequest - запрос на добавление услуги в бронирование
@@ -248,6 +250,39 @@ func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *
 		return
 	}
 
+	// Уведомляем пользователя при подтверждении или отклонении
+	if body.Status == "approved" || body.Status == "rejected" || body.Status == "completed" {
+		booking, err := h.repo.GetByID(id)
+		if err == nil && booking.UserID != nil {
+			// Получаем название услуги и компании
+			var bs models.BookingService
+			serviceName, companyName := "", ""
+			if h.db.Preload("CompanyService.Service").Preload("CompanyService.Company").
+				Where("booking_id = ?", id).First(&bs).Error == nil {
+				serviceName = bs.CompanyService.Service.Title
+				companyName = bs.CompanyService.Company.Name
+			}
+
+			title, message := "", ""
+			switch body.Status {
+			case "approved":
+				title = "Бронирование подтверждено"
+				message = "Компания «" + companyName + "» подтвердила вашу бронь услуги «" + serviceName + "»."
+			case "rejected":
+				title = "Бронирование отклонено"
+				message = "Компания «" + companyName + "» отклонила вашу бронь услуги «" + serviceName + "»."
+			case "completed":
+				title = "Бронирование выполнено"
+				message = "Компания «" + companyName + "» выполнила услугу «" + serviceName + "»."
+			}
+			h.db.Create(&models.Notification{
+				UserID:  *booking.UserID,
+				Title:   title,
+				Message: message,
+			})
+		}
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -284,6 +319,40 @@ func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
 	if err := h.repo.UpdateStatus(id, "cancelled"); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Уведомляем владельцев компаний из этого бронирования
+	var ownerIDs []int64
+	h.db.Model(&models.BookingService{}).
+		Joins("JOIN company_service ON company_service.company_service_id = booking_service.company_service_id").
+		Joins("JOIN company ON company.company_id = company_service.company_id").
+		Where("booking_service.booking_id = ?", id).
+		Distinct("company.user_id").
+		Pluck("company.user_id", &ownerIDs)
+
+	var userName string
+	if booking.User != nil {
+		userName = booking.User.Name
+	} else {
+		h.db.Model(&models.User{}).Where("user_id = ?", userID).Pluck("name", &userName)
+	}
+	if len(ownerIDs) > 0 {
+		// Получаем название услуги для более информативного сообщения
+		var bs models.BookingService
+		serviceName := ""
+		if h.db.Preload("CompanyService.Service").Where("booking_id = ?", id).First(&bs).Error == nil {
+			serviceName = bs.CompanyService.Service.Title
+		}
+		notifs := make([]models.Notification, 0, len(ownerIDs))
+		for _, oid := range ownerIDs {
+			msg := "Пользователь " + userName + " отменил бронь услуги «" + serviceName + "»."
+			notifs = append(notifs, models.Notification{
+				UserID:  oid,
+				Title:   "Бронь отменена",
+				Message: msg,
+			})
+		}
+		h.db.Create(&notifs)
 	}
 
 	w.WriteHeader(http.StatusOK)

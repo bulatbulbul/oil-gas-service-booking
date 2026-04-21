@@ -46,14 +46,15 @@ func main() {
 
 	companyHandler := handlers.NewCompanyHandler(companyRepo)
 	userHandler := handlers.NewUserHandler(userRepo)
-	bookingHandler := handlers.NewBookingHandler(bookingRepo)
+	bookingHandler := handlers.NewBookingHandler(bookingRepo, db)
 	serviceHandler := handlers.NewServiceHandler(serviceRepo, serviceRepo, companyRepo, companyServiceRepo)
 	businessHandler := handlers.NewBusinessHandler(businessRepo)
 	authHandler := handlers.NewAuthHandler(db)
-	bookingServiceHandler := handlers.NewBookingServiceHandler(bookingServiceRepo)
+	bookingServiceHandler := handlers.NewBookingServiceHandler(bookingServiceRepo, db)
 	companyServiceHandler := handlers.NewCompanyServiceHandler(companyServiceRepo, companyRepo)
 	uploadHandler := handlers.NewUploadHandler(db, uploadsDir)
 	serviceRequestHandler := handlers.NewServiceRequestHandler(db)
+	notificationHandler := handlers.NewNotificationHandler(db)
 
 	r := router.NewRouter(
 		companyHandler,
@@ -67,6 +68,7 @@ func main() {
 		uploadHandler,
 		uploadsDir,
 		serviceRequestHandler,
+		notificationHandler,
 	)
 
 	host := cfg.HTTPServer.Address

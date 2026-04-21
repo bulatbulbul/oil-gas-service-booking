@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useSearch } from "../hooks/useSearch";
 import { BASE_URL } from "../api/client";
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
@@ -88,6 +88,12 @@ function SearchServicesPage() {
 
     const [comment, setComment] = useState("");
     const [bookingComment, setBookingComment] = useState("");
+    const [searchParams] = useSearchParams();
+
+    useEffect(() => {
+        const q = searchParams.get("q");
+        if (q) setFilter(q);
+    }, []);
 
     useEffect(() => {
         if (!bookingToast) return;
@@ -202,9 +208,7 @@ function SearchServicesPage() {
                     {/* Счётчик */}
                     {!servicesLoading && (
                         <p style={{ fontSize: 12, color: "#aaa", marginBottom: 16 }}>
-                            {filter
-                                ? `${filteredServices.length} из ${0 + (filteredServices.length + (filter ? 0 : 0))} услуг`
-                                : `${filteredServices.length} услуг`}
+                            {filteredServices.length} услуг
                         </p>
                     )}
 

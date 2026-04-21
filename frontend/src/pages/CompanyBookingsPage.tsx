@@ -30,7 +30,12 @@ function formatDate(iso?: string) {
 function CompanyBookingsPage() {
     const {
         bookings, filtered, loading, error,
-        q, setQ, statusFilter, setStatusFilter, sort, setSort,
+        q, setQ, statusFilter, setStatusFilter,
+        sort, setSort,
+        serviceFilter, setServiceFilter,
+        companyFilter, setCompanyFilter,
+        clientFilter, setClientFilter,
+        services, companies, clients,
         handleStatusChange,
     } = useCompanyBookings();
 
@@ -64,7 +69,7 @@ function CompanyBookingsPage() {
             </div>
 
             {/* Фильтр по статусу — кнопки */}
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 28 }}>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
                 {(["all", ...BOOKING_STATUSES] as const).map((s) => {
                     const active = statusFilter === s;
                     return (
@@ -93,20 +98,79 @@ function CompanyBookingsPage() {
                         </button>
                     );
                 })}
-
-                <div style={{ marginLeft: "auto" }}>
-                    <select
-                        value={sort}
-                        onChange={(e) => setSort(e.target.value as "new" | "old")}
-                        style={{ padding: "5px 12px", border: "1px solid #e0e0e0", borderRadius: 20, fontSize: 12, fontFamily: "inherit", outline: "none", background: "#fff", color: "#555", cursor: "pointer" }}
-                    >
-                        <option value="new">Сначала новые</option>
-                        <option value="old">Сначала старые</option>
-                    </select>
-                </div>
             </div>
 
-            {(q || statusFilter !== "all") && (
+            {/* Сортировка и фильтры */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
+                {/* Дата — кнопка-переключатель */}
+                <button
+                    onClick={() => setSort(sort === "new" ? "old" : "new")}
+                    style={{
+                        width: 160, display: "flex", alignItems: "center", justifyContent: "center", gap: 5,
+                        padding: "6px 14px", borderRadius: 20, boxSizing: "border-box",
+                        border: "1px solid #000", background: "#000", color: "#fff",
+                        fontSize: 12, fontWeight: 500, cursor: "pointer", fontFamily: "inherit",
+                    }}
+                >
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
+                        {sort === "new"
+                            ? <path d="M5.5 1v9M2 7l3.5 3.5L9 7" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                            : <path d="M5.5 10V1M2 4L5.5.5 9 4" stroke="#fff" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+                        }
+                    </svg>
+                    {sort === "new" ? "Сначала новые" : "Сначала старые"}
+                </button>
+
+                {/* Услуга */}
+                <select
+                    value={serviceFilter}
+                    onChange={e => setServiceFilter(e.target.value)}
+                    style={{
+                        width: 160, padding: "6px 14px", borderRadius: 20, fontSize: 12, fontFamily: "inherit",
+                        outline: "none", cursor: "pointer", boxSizing: "border-box",
+                        border: serviceFilter ? "1px solid #000" : "1px solid #e0e0e0",
+                        background: serviceFilter ? "#000" : "#fff",
+                        color: serviceFilter ? "#fff" : "#555",
+                    }}
+                >
+                    <option value="">Все услуги</option>
+                    {services.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+
+                {/* Компания */}
+                <select
+                    value={companyFilter}
+                    onChange={e => setCompanyFilter(e.target.value)}
+                    style={{
+                        width: 160, padding: "6px 14px", borderRadius: 20, fontSize: 12, fontFamily: "inherit",
+                        outline: "none", cursor: "pointer", boxSizing: "border-box",
+                        border: companyFilter ? "1px solid #000" : "1px solid #e0e0e0",
+                        background: companyFilter ? "#000" : "#fff",
+                        color: companyFilter ? "#fff" : "#555",
+                    }}
+                >
+                    <option value="">Все компании</option>
+                    {companies.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+
+                {/* Клиент */}
+                <select
+                    value={clientFilter}
+                    onChange={e => setClientFilter(e.target.value)}
+                    style={{
+                        width: 160, padding: "6px 14px", borderRadius: 20, fontSize: 12, fontFamily: "inherit",
+                        outline: "none", cursor: "pointer", boxSizing: "border-box",
+                        border: clientFilter ? "1px solid #000" : "1px solid #e0e0e0",
+                        background: clientFilter ? "#000" : "#fff",
+                        color: clientFilter ? "#fff" : "#555",
+                    }}
+                >
+                    <option value="">Все клиенты</option>
+                    {clients.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+            </div>
+
+            {(q || statusFilter !== "all" || serviceFilter || companyFilter || clientFilter) && (
                 <p style={{ fontSize: 12, color: "#bbb", marginBottom: 20 }}>
                     Найдено: {filtered.length} из {bookings.length}
                 </p>

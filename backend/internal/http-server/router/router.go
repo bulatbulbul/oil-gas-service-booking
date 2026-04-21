@@ -23,6 +23,7 @@ func NewRouter(
 	uploadHandler *handlers.UploadHandler,
 	uploadsDir string,
 	serviceRequestHandler *handlers.ServiceRequestHandler,
+	notificationHandler *handlers.NotificationHandler,
 ) *chi.Mux {
 
 	r := chi.NewRouter()
@@ -119,8 +120,19 @@ func NewRouter(
 	// ------------ SERVICE REQUESTS ------------
 	r.Route("/service-requests", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", serviceRequestHandler.Create)
+		r.With(authmw.BasicAuthMiddleware(false)).Post("/{id}/respond", serviceRequestHandler.Respond)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/", serviceRequestHandler.GetAll)
 		r.With(authmw.BasicAuthMiddleware(true)).Put("/{id}/status", serviceRequestHandler.UpdateStatus)
+		r.With(authmw.BasicAuthMiddleware(true)).Post("/{id}/notify-companies", serviceRequestHandler.NotifyCompanies)
+	})
+
+	// ------------ NOTIFICATIONS ------------
+	r.Route("/notifications", func(r chi.Router) {
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/", notificationHandler.GetMy)
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/unread-count", notificationHandler.UnreadCount)
+		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}/read", notificationHandler.MarkRead)
+		r.With(authmw.BasicAuthMiddleware(false)).Put("/read-all", notificationHandler.MarkAllRead)
+		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", notificationHandler.Delete)
 	})
 
 	// ------------ BUSINESS (аналитика) ------------

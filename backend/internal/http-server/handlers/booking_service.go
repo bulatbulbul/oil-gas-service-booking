@@ -6,16 +6,18 @@ import (
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"gorm.io/gorm"
 	"oil-gas-service-booking/internal/http-server/repository"
 	"oil-gas-service-booking/internal/models"
 )
 
 type BookingServiceHandler struct {
 	repo *repository.BookingServiceRepo
+	db   *gorm.DB
 }
 
-func NewBookingServiceHandler(repo *repository.BookingServiceRepo) *BookingServiceHandler {
-	return &BookingServiceHandler{repo: repo}
+func NewBookingServiceHandler(repo *repository.BookingServiceRepo, db *gorm.DB) *BookingServiceHandler {
+	return &BookingServiceHandler{repo: repo, db: db}
 }
 
 type BookingServiceRequest struct {
@@ -49,6 +51,24 @@ func (h *BookingServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	if err := h.repo.Create(&bookingService); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
+	}
+
+	// Уведомляем владельца компании о новом бронировании
+	var cs models.CompanyService
+	if err := h.db.Preload("Company").Preload("Service").
+		First(&cs, "company_service_id = ?", input.CompanyServiceID).Error; err == nil {
+		var booking models.Booking
+		if err := h.db.Preload("User").First(&booking, "booking_id = ?", input.BookingID).Error; err == nil {
+			userName := "Пользователь"
+			if booking.User != nil {
+				userName = booking.User.Name
+			}
+			h.db.Create(&models.Notification{
+				UserID:  cs.Company.UserID,
+				Title:   "Новое бронирование",
+				Message: userName + " забронировал услугу «" + cs.Service.Title + "» в компании «" + cs.Company.Name + "».",
+			})
+		}
 	}
 
 	w.WriteHeader(http.StatusCreated)

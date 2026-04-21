@@ -100,7 +100,35 @@ type ServiceRequest struct {
 	Status      string    `gorm:"column:status;default:'pending'" json:"status"` // pending, reviewed
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
 
-	User User `gorm:"foreignKey:UserID;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user,omitempty"`
+	User      User                     `gorm:"foreignKey:UserID;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user,omitempty"`
+	Responses []ServiceRequestResponse `gorm:"foreignKey:RequestID" json:"responses,omitempty"`
 }
 
 func (ServiceRequest) TableName() string { return "service_request" }
+
+type Notification struct {
+	NotificationID uint      `gorm:"primaryKey;autoIncrement" json:"notification_id"`
+	UserID         int64     `gorm:"not null;index" json:"user_id"`
+	Title          string    `gorm:"not null" json:"title"`
+	Message        string    `gorm:"not null" json:"message"`
+	IsRead         bool      `gorm:"default:false" json:"is_read"`
+	ActionType     string    `gorm:"column:action_type;default:''" json:"action_type,omitempty"`
+	RequestID      *int64    `gorm:"column:request_id" json:"request_id,omitempty"`
+	ActionData     string    `gorm:"column:action_data;default:''" json:"action_data,omitempty"`
+	CreatedAt      time.Time `gorm:"autoCreateTime" json:"created_at"`
+
+	User User `gorm:"foreignKey:UserID;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"-"`
+}
+
+func (Notification) TableName() string { return "notification" }
+
+type ServiceRequestResponse struct {
+	ResponseID int64     `gorm:"column:response_id;primaryKey;autoIncrement" json:"response_id"`
+	RequestID  int64     `gorm:"column:request_id;not null;index" json:"request_id"`
+	CompanyID  int64     `gorm:"column:company_id;not null" json:"company_id"`
+	CreatedAt  time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
+
+	Company Company `gorm:"foreignKey:CompanyID;references:CompanyID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"company,omitempty"`
+}
+
+func (ServiceRequestResponse) TableName() string { return "service_request_response" }
