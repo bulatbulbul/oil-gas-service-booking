@@ -21,21 +21,6 @@ func NewBookingHandler(repo *repository.BookingRepo, db *gorm.DB) *BookingHandle
 	return &BookingHandler{repo: repo, db: db}
 }
 
-// BookingServiceItemRequest - запрос на добавление услуги в бронирование
-type BookingServiceItemRequest struct {
-	CompanyServiceID int64   `json:"company_service_id"`
-	Notes            *string `json:"notes,omitempty"`
-}
-
-// CreateBookingRequest - запрос на создание бронирования
-type CreateBookingRequest struct {
-	Description *string                     `json:"description,omitempty"`
-	Status      string                      `json:"status,omitempty"`
-	UserID      *int64                      `json:"user_id,omitempty"` // Только для админов
-	Services    []BookingServiceItemRequest `json:"services,omitempty"`
-}
-
-// CreateBooking godoc
 func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input BookingCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -87,10 +72,7 @@ func (h *BookingHandler) Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(booking)
 }
 
-// GetBookings godoc
 func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	// только админ, это уже настроено в router.go
-
 	userIDStr := r.URL.Query().Get("user_id")
 	if userIDStr != "" {
 		id, err := strconv.ParseInt(userIDStr, 10, 64)
@@ -109,7 +91,6 @@ func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// если user_id не передан — как раньше: все бронирования
 	bookings, err := h.repo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -119,7 +100,6 @@ func (h *BookingHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(bookings)
 }
 
-// GetMyBookings godoc
 func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -136,9 +116,12 @@ func (h *BookingHandler) GetMyBookings(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(bookings)
 }
 
-// GetBooking godoc
 func (h *BookingHandler) GetByID(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
 
 	booking, err := h.repo.GetByID(id)
 	if err != nil {
@@ -149,9 +132,12 @@ func (h *BookingHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(booking)
 }
 
-// UpdateBooking godoc
 func (h *BookingHandler) Update(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
 
 	booking, err := h.repo.GetByID(id)
 	if err != nil {
@@ -172,9 +158,12 @@ func (h *BookingHandler) Update(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(booking)
 }
 
-// DeleteBooking godoc
 func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	if err != nil {
+		http.Error(w, "invalid id", http.StatusBadRequest)
+		return
+	}
 
 	if err := h.repo.Delete(id); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -184,7 +173,6 @@ func (h *BookingHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// GetMyCompanyBookings godoc
 func (h *BookingHandler) GetMyCompanyBookings(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -201,7 +189,6 @@ func (h *BookingHandler) GetMyCompanyBookings(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(bookings)
 }
 
-// UpdateMyCompanyBookingStatus godoc
 func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -250,11 +237,9 @@ func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *
 		return
 	}
 
-	// Уведомляем пользователя при подтверждении или отклонении
 	if body.Status == "approved" || body.Status == "rejected" || body.Status == "completed" {
 		booking, err := h.repo.GetByID(id)
 		if err == nil && booking.UserID != nil {
-			// Получаем название услуги и компании
 			var bs models.BookingService
 			serviceName, companyName := "", ""
 			if h.db.Preload("CompanyService.Service").Preload("CompanyService.Company").
@@ -286,7 +271,6 @@ func (h *BookingHandler) UpdateMyCompanyBookingStatus(w http.ResponseWriter, r *
 	w.WriteHeader(http.StatusOK)
 }
 
-// CancelMy godoc
 func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -321,7 +305,6 @@ func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомляем владельцев компаний из этого бронирования
 	var ownerIDs []int64
 	h.db.Model(&models.BookingService{}).
 		Joins("JOIN company_service ON company_service.company_service_id = booking_service.company_service_id").
@@ -337,7 +320,6 @@ func (h *BookingHandler) CancelMy(w http.ResponseWriter, r *http.Request) {
 		h.db.Model(&models.User{}).Where("user_id = ?", userID).Pluck("name", &userName)
 	}
 	if len(ownerIDs) > 0 {
-		// Получаем название услуги для более информативного сообщения
 		var bs models.BookingService
 		serviceName := ""
 		if h.db.Preload("CompanyService.Service").Where("booking_id = ?", id).First(&bs).Error == nil {
@@ -377,7 +359,6 @@ func (h *BookingHandler) DeleteMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// защита: можно удалять только свою бронь
 	if booking.UserID == nil || *booking.UserID != userID {
 		http.Error(w, "forbidden", http.StatusForbidden)
 		return

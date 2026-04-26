@@ -14,7 +14,7 @@ function BookingsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    const navigate = useNavigate(); // <-- вот здесь
+    const navigate = useNavigate();
 
     async function loadBookings() {
         try {

@@ -91,21 +91,10 @@ function AdminServiceRequestsPage() {
 
     return (
         <div style={pageStyle}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+            <div style={{ marginBottom: 8 }}>
                 <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", margin: 0 }}>
                     Заявки на услуги
                 </h1>
-                <button
-                    onClick={load}
-                    style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 14px", border: "1px solid #e8e8e8", borderRadius: 2, background: "#fff", fontSize: 12, cursor: "pointer", fontFamily: "inherit", color: "#666" }}
-                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.color = "#000"; }}
-                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#666"; }}
-                >
-                    <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                        <path d="M10 6A4 4 0 1 1 6 2a4 4 0 0 1 3.5 2M10 2v2.5H7.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Обновить
-                </button>
             </div>
             <p style={{ fontSize: 13, color: "#666", marginBottom: 32 }}>
                 {pendingCount > 0
@@ -113,7 +102,6 @@ function AdminServiceRequestsPage() {
                     : "Новых заявок нет"}
             </p>
 
-            {/* Поиск */}
             <div style={{ position: "relative", marginBottom: 16 }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                     style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.35, pointerEvents: "none" }}>
@@ -130,7 +118,6 @@ function AdminServiceRequestsPage() {
                 />
             </div>
 
-            {/* Фильтр по статусу */}
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
                 {(["all", "pending", "reviewed"] as const).map((s) => (
                     <button
@@ -155,7 +142,6 @@ function AdminServiceRequestsPage() {
                 ))}
             </div>
 
-            {/* Сортировка и фильтры */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
                 <button
                     onClick={() => setSort(sort === "new" ? "old" : "new")}

@@ -5,8 +5,6 @@ import type { Company } from "../types";
 import { BASE_URL } from "../api/client";
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
 
-// ── Карточка компании ────────────────────────────────────────────────────────
-
 function CompanyCard({
     company,
     logoUploading,
@@ -33,7 +31,6 @@ function CompanyCard({
             onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)")}
             onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
         >
-            {/* Логотип (просто картинка, не кликабельная) */}
             <div style={{ width: "100%", aspectRatio: "1/1", overflow: "hidden", flexShrink: 0 }}>
                 {isUploading ? (
                     <div style={{ width: "100%", height: "100%", background: "#f4f4f4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, color: "#999" }}>
@@ -48,7 +45,6 @@ function CompanyCard({
                 )}
             </div>
 
-            {/* Тело карточки — клик = перейти к услугам */}
             <div
                 onClick={onSelect}
                 style={{ padding: "14px 16px 8px", cursor: "pointer" }}
@@ -61,7 +57,6 @@ function CompanyCard({
                 <div style={{ fontSize: 11, color: "#aaa", marginTop: 4 }}>Нажмите, чтобы увидеть услуги →</div>
             </div>
 
-            {/* Кнопки */}
             <div style={{ padding: "10px 16px 14px", display: "flex", gap: 6 }}>
                 <button onClick={onUploadLogo} disabled={logoUploading !== null}
                     style={{ flex: 1, padding: "6px 0", border: "1px solid #e8e8e8", borderRadius: 4, background: "#fff", color: "#666", fontSize: 11, fontWeight: 500, cursor: logoUploading !== null ? "default" : "pointer", fontFamily: "inherit" }}
@@ -89,8 +84,6 @@ function CompanyCard({
     );
 }
 
-// ── Детальный вид компании ───────────────────────────────────────────────────
-
 function CompanyDetail({ company, logoVersion, onBack }: { company: Company; logoVersion?: number; onBack: () => void }) {
     const { items, loading, creating, handleCreate, handleUpdateService, handleDelete } = useMyServices();
     const [newTitle, setNewTitle] = useState("");
@@ -108,7 +101,6 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
 
     return (
         <div>
-            {/* Навигация назад */}
             <button
                 onClick={onBack}
                 style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "none", border: "none", cursor: "pointer", fontFamily: "inherit", fontSize: 13, color: "#888", padding: 0, marginBottom: 32 }}
@@ -121,9 +113,7 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
                 Мои компании
             </button>
 
-            {/* Шапка компании */}
             <div style={{ display: "flex", gap: 28, alignItems: "flex-start", marginBottom: 40, paddingBottom: 36, borderBottom: "1px solid #e8e8e8" }}>
-                {/* Лого */}
                 <div style={{ width: 280, flexShrink: 0, aspectRatio: "1/1", borderRadius: 8, overflow: "hidden", border: "1px solid #e8e8e8" }}>
                     {company.logo_url ? (
                         <img src={`${BASE_URL}${company.logo_url}${logoVersion ? `?v=${logoVersion}` : ""}`} alt={company.Name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -134,7 +124,6 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
                     )}
                 </div>
 
-                {/* Инфо */}
                 <div style={{ paddingTop: 8 }}>
                     <h1 style={{ fontSize: 26, fontWeight: 700, letterSpacing: "-0.6px", margin: "0 0 8px" }}>{company.Name}</h1>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -146,7 +135,6 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
                 </div>
             </div>
 
-            {/* Форма добавления услуги */}
             <form
                 onSubmit={e => { e.preventDefault(); handleCreate(company.CompanyID, newTitle).then(() => setNewTitle("")); }}
                 style={{ display: "flex", gap: 8, marginBottom: 32 }}
@@ -168,7 +156,6 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
                 </button>
             </form>
 
-            {/* Услуги */}
             {loading ? (
                 <p style={{ fontSize: 14, color: "#999" }}>Загрузка...</p>
             ) : services.length === 0 ? (
@@ -237,8 +224,6 @@ function CompanyDetail({ company, logoVersion, onBack }: { company: Company; log
     );
 }
 
-// ── Главная страница ─────────────────────────────────────────────────────────
-
 function CompaniesPage() {
     const {
         companies, loading, error, creating,
@@ -259,9 +244,7 @@ function CompaniesPage() {
     if (loading) return <div style={pageStyle}><span style={{ color: "#999", fontSize: 14 }}>Загрузка...</span></div>;
     if (error) return <div style={pageStyle}><span style={{ fontSize: 14 }}>{error}</span></div>;
 
-    // Если выбрана компания — показываем её услуги
     if (selectedCompany) {
-        // Передаём актуальные данные компании (логотип мог обновиться)
         const fresh = companies.find(c => c.CompanyID === selectedCompany.CompanyID) ?? selectedCompany;
         return (
             <div style={pageStyle}>
@@ -279,7 +262,6 @@ function CompaniesPage() {
                 {companies.length} {companies.length === 1 ? "компания" : "компаний"}
             </p>
 
-            {/* Форма создания */}
             <form onSubmit={onSubmitCreate} style={{ display: "flex", gap: 8, marginBottom: 40 }}>
                 <input
                     value={newName}
@@ -298,7 +280,6 @@ function CompaniesPage() {
                 </button>
             </form>
 
-            {/* Диалог переименования */}
             {editingId !== null && (
                 <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 100, display: "flex", alignItems: "center", justifyContent: "center" }}
                     onClick={() => setEditingId(null)}

@@ -36,7 +36,6 @@ function MyServicesPage() {
                 {items.length} {items.length === 1 ? "услуга" : "услуг"} у ваших компаний
             </p>
 
-            {/* Форма добавления */}
             <form onSubmit={onSubmitCreate} style={{ display: "flex", gap: 8, marginBottom: 40, flexWrap: "wrap" }}>
                 <select
                     value={selectedCompanyId}
@@ -83,14 +82,12 @@ function MyServicesPage() {
                                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 16px rgba(0,0,0,0.07)")}
                                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                             >
-                                {/* Компания-тег */}
                                 <div style={{ display: "inline-block" }}>
                                     <span style={{ fontSize: 11, fontWeight: 600, color: "#666", background: "#f4f4f4", padding: "3px 10px", borderRadius: 3, letterSpacing: "0.3px" }}>
                                         {cs.Company?.Name || "—"}
                                     </span>
                                 </div>
 
-                                {/* Название услуги */}
                                 {isEditing ? (
                                     <input
                                         value={editingTitle}
@@ -104,7 +101,6 @@ function MyServicesPage() {
                                     </div>
                                 )}
 
-                                {/* Кнопки */}
                                 <div style={{ display: "flex", gap: 6, borderTop: "1px solid #f0f0f0", paddingTop: 12, marginTop: "auto" }}>
                                     {isEditing ? (
                                         <>

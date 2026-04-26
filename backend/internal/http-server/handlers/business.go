@@ -18,7 +18,6 @@ func NewBusinessHandler(businessRepo *repository.BusinessRepo) *BusinessHandler 
 	return &BusinessHandler{businessRepo: businessRepo}
 }
 
-// CompaniesByService godoc
 func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.Request) {
 	serviceID, err := strconv.ParseInt(chi.URLParam(r, "serviceId"), 10, 64)
 	if err != nil {
@@ -36,7 +35,6 @@ func (h *BusinessHandler) FindCompaniesByService(w http.ResponseWriter, r *http.
 	json.NewEncoder(w).Encode(companies)
 }
 
-// UsersWithBookings godoc
 func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *http.Request) {
 	users, err := h.businessRepo.FindUsersWithActiveBookings()
 	if err != nil {
@@ -48,9 +46,7 @@ func (h *BusinessHandler) FindUsersWithActiveBookings(w http.ResponseWriter, r *
 	json.NewEncoder(w).Encode(users)
 }
 
-// CompanyStats godoc
 func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request) {
-	// Параметры для фильтрации по дате
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")
 
@@ -64,7 +60,7 @@ func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request
 			return
 		}
 	} else {
-		fromDate = time.Now().AddDate(0, -1, 0) // По умолчанию: последний месяц
+		fromDate = time.Now().AddDate(0, -1, 0)
 	}
 
 	if toStr != "" {
@@ -74,7 +70,7 @@ func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request
 			return
 		}
 	} else {
-		toDate = time.Now() // По умолчанию: текущая дата
+		toDate = time.Now()
 	}
 
 	stats, err := h.businessRepo.GetCompanyStats(fromDate, toDate)
@@ -87,7 +83,6 @@ func (h *BusinessHandler) GetCompanyStats(w http.ResponseWriter, r *http.Request
 	json.NewEncoder(w).Encode(stats)
 }
 
-// PopularServices godoc
 func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Request) {
 	limit := 10
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -107,7 +102,6 @@ func (h *BusinessHandler) FindPopularServices(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(services)
 }
 
-// GetSummary godoc
 func (h *BusinessHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
 	summary, err := h.businessRepo.GetSummary()
 	if err != nil {
@@ -118,7 +112,6 @@ func (h *BusinessHandler) GetSummary(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(summary)
 }
 
-// GetBookingsByDate godoc
 func (h *BusinessHandler) GetBookingsByDate(w http.ResponseWriter, r *http.Request) {
 	fromStr := r.URL.Query().Get("from")
 	toStr := r.URL.Query().Get("to")
@@ -146,7 +139,6 @@ func (h *BusinessHandler) GetBookingsByDate(w http.ResponseWriter, r *http.Reque
 	json.NewEncoder(w).Encode(rows)
 }
 
-// PopularCompanies godoc
 func (h *BusinessHandler) FindPopularCompanies(w http.ResponseWriter, r *http.Request) {
 	limit := 10
 	if limitStr := r.URL.Query().Get("limit"); limitStr != "" {
@@ -166,7 +158,6 @@ func (h *BusinessHandler) FindPopularCompanies(w http.ResponseWriter, r *http.Re
 	json.NewEncoder(w).Encode(companies)
 }
 
-// Search godoc
 func (h *BusinessHandler) SearchAll(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query().Get("q")
 	if query == "" {

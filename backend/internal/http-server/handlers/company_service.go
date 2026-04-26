@@ -27,13 +27,11 @@ func NewCompanyServiceHandler(
 	}
 }
 
-// CompanyServiceCreateRequest - запрос на создание связи компании и услуги
 type CompanyServiceCreateRequest struct {
 	CompanyID int64 `json:"company_id"`
 	ServiceID int64 `json:"service_id"`
 }
 
-// CreateCompanyService godoc
 func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -80,7 +78,6 @@ func (h *CompanyServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(cs)
 }
 
-// GetCompanyServicesByCompanyID godoc
 func (h *CompanyServiceHandler) GetByCompanyID(w http.ResponseWriter, r *http.Request) {
 	companyID, err := strconv.ParseInt(chi.URLParam(r, "company_id"), 10, 64)
 	if err != nil {
@@ -97,7 +94,6 @@ func (h *CompanyServiceHandler) GetByCompanyID(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(list)
 }
 
-// GetCompanyServicesByServiceID godoc
 func (h *CompanyServiceHandler) GetByServiceID(w http.ResponseWriter, r *http.Request) {
 	serviceID, err := strconv.ParseInt(chi.URLParam(r, "service_id"), 10, 64)
 	if err != nil {
@@ -114,7 +110,6 @@ func (h *CompanyServiceHandler) GetByServiceID(w http.ResponseWriter, r *http.Re
 	_ = json.NewEncoder(w).Encode(list)
 }
 
-// UpdateCompanyService godoc
 func (h *CompanyServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -141,7 +136,6 @@ func (h *CompanyServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(cs)
 }
 
-// DeleteCompanyService godoc
 func (h *CompanyServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -157,7 +151,6 @@ func (h *CompanyServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// GetMyCompanyServices godoc
 func (h *CompanyServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

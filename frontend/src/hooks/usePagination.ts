@@ -14,7 +14,6 @@ export function usePagination<T>(items: T[], pageSize = 10) {
         setPage(Math.min(Math.max(1, p), totalPages));
     }
 
-    // Сбрасываем на первую страницу при изменении данных
     useMemo(() => {
         if (page > totalPages) setPage(1);
     }, [totalPages]);

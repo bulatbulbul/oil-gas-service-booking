@@ -20,7 +20,6 @@ func NewCompanyHandler(repo *repository.CompanyRepository) *CompanyHandler {
 	return &CompanyHandler{repo: repo}
 }
 
-// CreateCompany godoc
 func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -39,7 +38,6 @@ func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// привязываем компанию к текущему пользователю
 	company.UserID = userID
 
 	if err := h.repo.Create(&company); err != nil {
@@ -47,11 +45,11 @@ func (h *CompanyHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(company)
 }
 
-// GetCompanies godoc
 func (h *CompanyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	data, err := h.repo.GetAll()
 	if err != nil {
@@ -59,10 +57,10 @@ func (h *CompanyHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(data)
 }
 
-// GetCompany godoc
 func (h *CompanyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -76,10 +74,10 @@ func (h *CompanyHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(company)
 }
 
-// UpdateCompany godoc
 func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -99,7 +97,6 @@ func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// разрешаем изменять только свою компанию
 	if company.UserID != userID {
 		http.Error(w, "forbidden: not your company", http.StatusForbidden)
 		return
@@ -115,7 +112,6 @@ func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// на всякий случай не даём переписать владельца
 	company.UserID = userID
 
 	if err := h.repo.Update(company); err != nil {
@@ -123,10 +119,10 @@ func (h *CompanyHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(company)
 }
 
-// DeleteCompany godoc
 func (h *CompanyHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -159,7 +155,6 @@ func (h *CompanyHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// GetMyCompanies godoc
 func (h *CompanyHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -167,7 +162,6 @@ func (h *CompanyHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// простейший вариант через репозиторий
 	all, err := h.repo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -181,5 +175,6 @@ func (h *CompanyHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(mine)
 }

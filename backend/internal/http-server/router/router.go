@@ -32,7 +32,7 @@ func NewRouter(
 	r.Use(chiMiddleware.Recoverer)
 
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowedOrigins:   []string{"http://localhost:5173", "http://localhost:80", "http://localhost"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
 		ExposedHeaders:   []string{"Link"},
@@ -40,7 +40,6 @@ func NewRouter(
 		MaxAge:           300,
 	}))
 
-	// ------------ AUTH (public) ------------
 	r.Route("/auth", func(r chi.Router) {
 		r.Post("/register", authHandler.Register)
 		r.Post("/login", authHandler.Login)
@@ -50,18 +49,15 @@ func NewRouter(
 	r.With(authmw.BasicAuthMiddleware(false)).Patch("/auth/me", authHandler.UpdateMe)
 	r.With(authmw.BasicAuthMiddleware(false)).Get("/auth/me/stats", authHandler.MyStats)
 
-	// ------------ COMPANIES (любой залогиненный) ------------
-	// companies
 	r.Route("/companies", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", companyHandler.Create)
-		r.With(authmw.BasicAuthMiddleware(false)).Get("/", companyHandler.GetAll)  // все компании
-		r.With(authmw.BasicAuthMiddleware(false)).Get("/my", companyHandler.GetMy) // ✅ только мои
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/", companyHandler.GetAll)
+		r.With(authmw.BasicAuthMiddleware(false)).Get("/my", companyHandler.GetMy)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/{id}", companyHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}", companyHandler.Update)
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", companyHandler.Delete)
 	})
 
-	// services
 	r.Route("/services", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", serviceHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/", serviceHandler.GetAll)
@@ -72,15 +68,12 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", serviceHandler.Delete)
 	})
 
-	// ------------ USERS (только admin) ------------
 	r.Route("/users", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/", userHandler.GetAll)
 		r.With(authmw.BasicAuthMiddleware(true)).Delete("/{id}", userHandler.Delete)
 	})
 
-	// ------------ BOOKINGS ------------
 	r.Route("/bookings", func(r chi.Router) {
-		// создать бронирование: любой залогиненный
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", bookingHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/me", bookingHandler.GetMyBookings)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/company", bookingHandler.GetMyCompanyBookings)
@@ -88,7 +81,6 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(false)).Put("/{id}/company-status", bookingHandler.UpdateMyCompanyBookingStatus)
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}/me", bookingHandler.DeleteMy)
 
-		// полный доступ: только admin
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/", bookingHandler.GetAll)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/{id}", bookingHandler.GetByID)
 		r.With(authmw.BasicAuthMiddleware(true)).Put("/{id}", bookingHandler.Update)
@@ -96,12 +88,10 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/{booking_id}/services", bookingServiceHandler.GetByBookingID)
 	})
 
-	// ------------ BOOKING-SERVICES ------------
 	r.Route("/booking-services", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", bookingServiceHandler.Create)
 	})
 
-	// ------------ COMPANY-SERVICES (любой залогиненный) ------------
 	r.Route("/company-services", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/my", companyServiceHandler.GetMy)
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", companyServiceHandler.Create)
@@ -109,7 +99,6 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", companyServiceHandler.Delete)
 	})
 
-	// ------------ UPLOAD ------------
 	r.Route("/upload", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/avatar", uploadHandler.UploadAvatar)
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/companies/{id}/logo", uploadHandler.UploadCompanyLogo)
@@ -117,7 +106,6 @@ func NewRouter(
 
 	r.Handle("/uploads/*", http.StripPrefix("/uploads/", http.FileServer(http.Dir(uploadsDir))))
 
-	// ------------ SERVICE REQUESTS ------------
 	r.Route("/service-requests", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/", serviceRequestHandler.Create)
 		r.With(authmw.BasicAuthMiddleware(false)).Post("/{id}/respond", serviceRequestHandler.Respond)
@@ -126,7 +114,6 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(true)).Post("/{id}/notify-companies", serviceRequestHandler.NotifyCompanies)
 	})
 
-	// ------------ NOTIFICATIONS ------------
 	r.Route("/notifications", func(r chi.Router) {
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/", notificationHandler.GetMy)
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/unread-count", notificationHandler.UnreadCount)
@@ -135,12 +122,9 @@ func NewRouter(
 		r.With(authmw.BasicAuthMiddleware(false)).Delete("/{id}", notificationHandler.Delete)
 	})
 
-	// ------------ BUSINESS (аналитика) ------------
 	r.Route("/business", func(r chi.Router) {
-		// поиск компаний по услуге: любой залогиненный
 		r.With(authmw.BasicAuthMiddleware(false)).Get("/companies-by-service/{serviceId}", businessHandler.FindCompaniesByService)
 
-		// аналитика: только admin
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/users-with-active-bookings", businessHandler.FindUsersWithActiveBookings)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/company-stats", businessHandler.GetCompanyStats)
 		r.With(authmw.BasicAuthMiddleware(true)).Get("/popular-services", businessHandler.FindPopularServices)

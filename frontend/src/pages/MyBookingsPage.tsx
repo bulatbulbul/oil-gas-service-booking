@@ -36,7 +36,6 @@ function MyBookingsPage() {
                 {bookings.length} {bookings.length === 1 ? "бронирование" : "бронирований"}
             </p>
 
-            {/* Поиск */}
             <div style={{ position: "relative", marginBottom: 16 }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                     style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.35, pointerEvents: "none" }}>
@@ -53,7 +52,6 @@ function MyBookingsPage() {
                 />
             </div>
 
-            {/* Фильтр по статусу — кнопки */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
                 {(["all", ...BOOKING_STATUSES] as const).map((s) => {
                     const active = statusFilter === s;
@@ -85,7 +83,6 @@ function MyBookingsPage() {
                 })}
             </div>
 
-            {/* Сортировка и фильтры */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
                 <button
                     onClick={() => setSort(sort === "new" ? "old" : "new")}
@@ -163,7 +160,6 @@ function MyBookingsPage() {
                                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)")}
                                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                             >
-                                {/* Шапка: статус + дата */}
                                 <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #f4f4f4" }}>
                                     <StatusBadge status={b.Status} />
                                     {b.CreatedAt && (
@@ -173,10 +169,8 @@ function MyBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Тело */}
                                 <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
 
-                                    {/* Компания */}
                                     {companies.length > 0 && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
@@ -201,7 +195,6 @@ function MyBookingsPage() {
                                         </div>
                                     )}
 
-                                    {/* Услуги */}
                                     {(b.BookingServices ?? []).length > 0 && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>Услуги</div>
@@ -218,7 +211,6 @@ function MyBookingsPage() {
                                         </div>
                                     )}
 
-                                    {/* Комментарий */}
                                     {b.Description && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Комментарий</div>
@@ -227,7 +219,6 @@ function MyBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Футер */}
                                 {(b.Status === "requested" || b.Status === "approved") && (
                                     <div style={{ padding: "12px 20px", borderTop: "1px solid #f4f4f4" }}>
                                         <button

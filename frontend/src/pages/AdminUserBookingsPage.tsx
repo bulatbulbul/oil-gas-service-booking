@@ -52,7 +52,6 @@ function AdminUserBookingsPage() {
                                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)")}
                                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                             >
-                                {/* Шапка */}
                                 <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #f4f4f4" }}>
                                     <StatusBadge status={b.Status} />
                                     {b.CreatedAt && (
@@ -60,7 +59,6 @@ function AdminUserBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Тело */}
                                 <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
                                     {companies.length > 0 && (
                                         <div>

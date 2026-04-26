@@ -34,7 +34,6 @@ func NewGorm(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("gorm.Open: %w", err)
 	}
 
-	// Миграции
 	if err := gormDB.AutoMigrate(
 		&models.User{},
 		&models.Company{},
@@ -50,7 +49,6 @@ func NewGorm(dsn string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("automigrate: %w", err)
 	}
 
-	// ВЫЗОВ SEED
 	if err := Seed(gormDB); err != nil {
 		return nil, fmt.Errorf("seed data: %w", err)
 	}

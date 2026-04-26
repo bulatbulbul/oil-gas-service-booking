@@ -1,10 +1,7 @@
 import { Link } from "react-router-dom";
 import { useAdminAnalytics } from "../hooks/useAdminAnalytics";
-import type { BookingByDate } from "../hooks/useAdminAnalytics";
 
 const pageStyle: React.CSSProperties = { maxWidth: 1040, margin: "0 auto", padding: "48px 32px" };
-
-// ── Вспомогательные компоненты ───────────────────────────────────────────────
 
 function StatCard({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
     return (
@@ -16,7 +13,6 @@ function StatCard({ label, value, sub }: { label: string; value: number | string
     );
 }
 
-/** Горизонтальный бар-чарт для популярных услуг */
 function ServiceBar({ title, count, maxCount }: { title: string; count: number; maxCount: number }) {
     const pct = maxCount > 0 ? (count / maxCount) * 100 : 0;
     return (
@@ -30,40 +26,8 @@ function ServiceBar({ title, count, maxCount }: { title: string; count: number; 
     );
 }
 
-/** Вертикальный бар-чарт для динамики по дням */
-function DateChart({ data }: { data: BookingByDate[] }) {
-    if (data.length === 0) {
-        return <p style={{ fontSize: 13, color: "#bbb" }}>Нет данных за период</p>;
-    }
-    const maxCount = Math.max(...data.map(d => d.count), 1);
-    const chartHeight = 140;
-
-    return (
-        <div style={{ display: "flex", alignItems: "flex-end", gap: 4, height: chartHeight + 32, overflowX: "auto", paddingBottom: 4 }}>
-            {data.map(d => {
-                const barH = Math.max((d.count / maxCount) * chartHeight, d.count > 0 ? 4 : 0);
-                const label = d.date.slice(5); // MM-DD
-                return (
-                    <div key={d.date} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4, flexShrink: 0, width: 28 }}>
-                        {d.count > 0 && (
-                            <div style={{ fontSize: 10, color: "#666", fontWeight: 600 }}>{d.count}</div>
-                        )}
-                        <div
-                            title={`${d.date}: ${d.count}`}
-                            style={{ width: 18, height: barH || 2, background: d.count > 0 ? "#000" : "#eee", borderRadius: "2px 2px 0 0", transition: "height 0.3s" }}
-                        />
-                        <div style={{ fontSize: 10, color: "#bbb", writingMode: "vertical-rl", transform: "rotate(180deg)", height: 32 }}>{label}</div>
-                    </div>
-                );
-            })}
-        </div>
-    );
-}
-
-// ── Главная страница ─────────────────────────────────────────────────────────
-
 function AdminAnalyticsPage() {
-    const { activeUsers, summary, popularServices, popularCompanies, bookingsByDate, loading, error } = useAdminAnalytics();
+    const { activeUsers, summary, popularServices, popularCompanies, loading, error } = useAdminAnalytics();
 
     if (loading) return <div style={pageStyle}><span style={{ color: "#999", fontSize: 14 }}>Загрузка...</span></div>;
     if (error)   return <div style={pageStyle}><span style={{ fontSize: 14 }}>{error}</span></div>;
@@ -71,21 +35,7 @@ function AdminAnalyticsPage() {
     const maxBookings = popularServices.length > 0 ? popularServices[0].booking_count : 1;
     const maxCompanyBookings = popularCompanies.length > 0 ? popularCompanies[0].booking_count : 1;
 
-    // Заполняем пропуски в датах нулями
-    const filledDates: BookingByDate[] = [];
-    if (bookingsByDate.length > 0) {
-        const dateMap = new Map(bookingsByDate.map(d => [d.date, d.count]));
-        const first = new Date(bookingsByDate[0].date);
-        const last  = new Date(bookingsByDate[bookingsByDate.length - 1].date);
-        const cur = new Date(first);
-        while (cur <= last) {
-            const key = cur.toISOString().slice(0, 10);
-            filledDates.push({ date: key, count: dateMap.get(key) ?? 0 });
-            cur.setDate(cur.getDate() + 1);
-        }
-    }
-
-    const thStyle: React.CSSProperties = {
+const thStyle: React.CSSProperties = {
         fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase",
         letterSpacing: "0.6px", textAlign: "left", padding: "0 0 10px 0", borderBottom: "1px solid #000",
     };
@@ -101,7 +51,6 @@ function AdminAnalyticsPage() {
                 <Link to="/admin" style={{ fontSize: 13, color: "#666", textDecoration: "none" }}>← Назад</Link>
             </div>
 
-            {/* ── Сводные карты ───────────────────────────────────────────── */}
             {summary && (
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, marginBottom: 48 }}>
                     <StatCard label="Всего бронирований" value={summary.total_bookings} />
@@ -132,7 +81,6 @@ function AdminAnalyticsPage() {
                 )}
             </div>
 
-            {/* ── Популярные компании ─────────────────────────────────────── */}
             <div style={{ marginBottom: 48 }}>
                 <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.3px", marginBottom: 4 }}>
                     Популярные компании
@@ -154,7 +102,6 @@ function AdminAnalyticsPage() {
                 )}
             </div>
 
-            {/* ── Активные пользователи ───────────────────────────────────── */}
             <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: "-0.3px", marginBottom: 16 }}>
                 Пользователи с активными бронированиями
             </div>

@@ -50,26 +50,6 @@ function App() {
                                 gap: 10,
                             }}
                         >
-                            <div
-                                style={{
-                                    width: 28,
-                                    height: 28,
-                                    background: "#000",
-                                    borderRadius: 2,
-                                    display: "flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    color: "#fff",
-                                    fontSize: 11,
-                                    fontWeight: 700,
-                                    letterSpacing: "0.5px",
-                                }}
-                            >
-                                OG
-                            </div>
-                            <span style={{ fontSize: 15, fontWeight: 600, color: "#000", letterSpacing: "-0.3px" }}>
-                                OilGas Booking
-                            </span>
                         </Link>
                     </div>
                 </header>

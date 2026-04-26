@@ -41,7 +41,6 @@ func NewServiceHandler(
 	}
 }
 
-// CreateService godoc
 func (h *ServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var input ServiceCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -58,11 +57,11 @@ func (h *ServiceHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	_ = json.NewEncoder(w).Encode(service)
 }
 
-// GetServices godoc
 func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	services, err := h.repo.GetAll()
 	if err != nil {
@@ -70,10 +69,10 @@ func (h *ServiceHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(services)
 }
 
-// GetService godoc
 func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -87,10 +86,10 @@ func (h *ServiceHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(service)
 }
 
-// UpdateService godoc
 func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -114,10 +113,10 @@ func (h *ServiceHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(service)
 }
 
-// DeleteService godoc
 func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -133,17 +132,16 @@ func (h *ServiceHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// GetAvailableServices godoc
 func (h *ServiceHandler) GetAvailable(w http.ResponseWriter, r *http.Request) {
 	services, err := h.serviceRepo.GetAvailable()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(services)
 }
 
-// GetMyServices godoc
 func (h *ServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -151,14 +149,12 @@ func (h *ServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 1. Все компании
 	companies, err := h.companyRepo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// 2. ID моих компаний
 	myCompanyIDs := map[int64]struct{}{}
 	for _, c := range companies {
 		if c.UserID == userID {
@@ -171,14 +167,12 @@ func (h *ServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 3. Все связи company_service
 	csList, err := h.companyServiceRepo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// 4. ID услуг моих компаний
 	myServiceIDs := map[int64]struct{}{}
 	for _, cs := range csList {
 		if _, ok := myCompanyIDs[cs.CompanyID]; ok {
@@ -191,7 +185,6 @@ func (h *ServiceHandler) GetMy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 5. Все услуги и фильтр по myServiceIDs
 	allServices, err := h.repo.GetAll()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

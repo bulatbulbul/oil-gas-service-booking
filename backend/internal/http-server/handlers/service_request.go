@@ -20,7 +20,6 @@ func NewServiceRequestHandler(db *gorm.DB) *ServiceRequestHandler {
 	return &ServiceRequestHandler{db: db}
 }
 
-// Create — пользователь подаёт заявку на услугу
 func (h *ServiceRequestHandler) Create(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -52,7 +51,6 @@ func (h *ServiceRequestHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Уведомляем всех админов о новой заявке
 	var adminIDs []int64
 	h.db.Model(&models.User{}).Where("role = 'admin'").Pluck("user_id", &adminIDs)
 	if len(adminIDs) > 0 {
@@ -72,7 +70,6 @@ func (h *ServiceRequestHandler) Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(req)
 }
 
-// GetAll — только для админа, с данными пользователя и откликами компаний
 func (h *ServiceRequestHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	var requests []models.ServiceRequest
 	if err := h.db.Preload("User").Preload("Responses.Company").Order("created_at desc").Find(&requests).Error; err != nil {
@@ -84,7 +81,6 @@ func (h *ServiceRequestHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(requests)
 }
 
-// NotifyCompanies — admin отправляет уведомление всем владельцам компаний
 func (h *ServiceRequestHandler) NotifyCompanies(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -98,7 +94,6 @@ func (h *ServiceRequestHandler) NotifyCompanies(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	// Получаем уникальных владельцев компаний
 	var ownerIDs []int64
 	if err := h.db.Model(&models.Company{}).Distinct("user_id").Pluck("user_id", &ownerIDs).Error; err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -131,7 +126,6 @@ func (h *ServiceRequestHandler) NotifyCompanies(w http.ResponseWriter, r *http.R
 	json.NewEncoder(w).Encode(map[string]int{"notified": len(notifications)})
 }
 
-// Respond — владелец компании добавляет услугу из заявки в свою компанию
 func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -153,21 +147,18 @@ func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// Проверяем что компания принадлежит пользователю
 	var company models.Company
 	if err := h.db.First(&company, "company_id = ? AND user_id = ?", body.CompanyID, userID).Error; err != nil {
 		http.Error(w, "company not found", http.StatusForbidden)
 		return
 	}
 
-	// Получаем заявку
 	var req models.ServiceRequest
 	if err := h.db.First(&req, "request_id = ?", requestID).Error; err != nil {
 		http.Error(w, "request not found", http.StatusNotFound)
 		return
 	}
 
-	// Ищем или создаём услугу с таким именем
 	var service models.Service
 	if err := h.db.Where("title = ?", req.ServiceName).First(&service).Error; err != nil {
 		service = models.Service{Title: req.ServiceName}
@@ -177,7 +168,6 @@ func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	// Добавляем услугу в компанию (если ещё не добавлена)
 	var existing models.CompanyService
 	if err := h.db.Where("company_id = ? AND service_id = ?", body.CompanyID, service.ServiceID).First(&existing).Error; err != nil {
 		cs := models.CompanyService{CompanyID: body.CompanyID, ServiceID: service.ServiceID}
@@ -187,15 +177,12 @@ func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
-	// Фиксируем отклик и отправляем уведомления только если это первый отклик от этой компании
 	var existingResp models.ServiceRequestResponse
 	if h.db.Where("request_id = ? AND company_id = ?", requestID, body.CompanyID).First(&existingResp).Error != nil {
 		h.db.Create(&models.ServiceRequestResponse{RequestID: requestID, CompanyID: body.CompanyID})
 
-		// Автоматически переводим заявку в "reviewed"
 		h.db.Model(&models.ServiceRequest{}).Where("request_id = ? AND status = 'pending'", requestID).Update("status", "reviewed")
 
-		// Уведомляем автора заявки
 		h.db.Create(&models.Notification{
 			UserID:     req.UserID,
 			Title:      "Услуга добавлена",
@@ -204,7 +191,6 @@ func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) 
 			ActionData: req.ServiceName,
 		})
 
-		// Уведомляем всех админов
 		var adminIDs []int64
 		h.db.Model(&models.User{}).Where("role = 'admin'").Pluck("user_id", &adminIDs)
 		if len(adminIDs) > 0 {
@@ -223,7 +209,6 @@ func (h *ServiceRequestHandler) Respond(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// UpdateStatus — админ меняет статус заявки (pending → reviewed)
 func (h *ServiceRequestHandler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {

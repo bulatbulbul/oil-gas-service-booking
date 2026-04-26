@@ -24,7 +24,6 @@ func NewUploadHandler(db *gorm.DB, uploadsDir string) *UploadHandler {
 	return &UploadHandler{db: db, uploadsDir: uploadsDir}
 }
 
-// UploadAvatar godoc
 func (h *UploadHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -47,7 +46,6 @@ func (h *UploadHandler) UploadAvatar(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, `{"avatar_url":%q}`, url)
 }
 
-// UploadCompanyLogo godoc
 func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -86,7 +84,6 @@ func (h *UploadHandler) UploadCompanyLogo(w http.ResponseWriter, r *http.Request
 	fmt.Fprintf(w, `{"logo_url":%q}`, url)
 }
 
-// UploadServiceImage godoc
 func (h *UploadHandler) UploadServiceImage(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
 	if err != nil {
@@ -115,9 +112,8 @@ func (h *UploadHandler) UploadServiceImage(w http.ResponseWriter, r *http.Reques
 	fmt.Fprintf(w, `{"image_url":%q}`, url)
 }
 
-// saveUpload парсит multipart-форму, проверяет расширение, сохраняет файл и возвращает URL.
 func (h *UploadHandler) saveUpload(r *http.Request, field, dir, nameWithoutExt string) (string, error) {
-	const maxSize = 8 << 20 // 8 MB
+	const maxSize = 8 << 20
 	if err := r.ParseMultipartForm(maxSize); err != nil {
 		return "", fmt.Errorf("failed to parse form: %w", err)
 	}
@@ -151,7 +147,6 @@ func (h *UploadHandler) saveUpload(r *http.Request, field, dir, nameWithoutExt s
 		return "", fmt.Errorf("cannot write file: %w", err)
 	}
 
-	// URL относительно /uploads/
 	rel, _ := filepath.Rel(h.uploadsDir, dest)
 	return "/uploads/" + filepath.ToSlash(rel), nil
 }

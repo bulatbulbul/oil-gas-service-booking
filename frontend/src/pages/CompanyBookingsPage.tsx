@@ -51,7 +51,6 @@ function CompanyBookingsPage() {
                 {bookings.length} {bookings.length === 1 ? "бронирование" : "бронирований"}
             </p>
 
-            {/* Поиск */}
             <div style={{ position: "relative", marginBottom: 16 }}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
                     style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", opacity: 0.35, pointerEvents: "none" }}>
@@ -68,7 +67,6 @@ function CompanyBookingsPage() {
                 />
             </div>
 
-            {/* Фильтр по статусу — кнопки */}
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginBottom: 16 }}>
                 {(["all", ...BOOKING_STATUSES] as const).map((s) => {
                     const active = statusFilter === s;
@@ -100,9 +98,7 @@ function CompanyBookingsPage() {
                 })}
             </div>
 
-            {/* Сортировка и фильтры */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 28 }}>
-                {/* Дата — кнопка-переключатель */}
                 <button
                     onClick={() => setSort(sort === "new" ? "old" : "new")}
                     style={{
@@ -121,7 +117,6 @@ function CompanyBookingsPage() {
                     {sort === "new" ? "Сначала новые" : "Сначала старые"}
                 </button>
 
-                {/* Услуга */}
                 <select
                     value={serviceFilter}
                     onChange={e => setServiceFilter(e.target.value)}
@@ -137,7 +132,6 @@ function CompanyBookingsPage() {
                     {services.map(s => <option key={s} value={s}>{s}</option>)}
                 </select>
 
-                {/* Компания */}
                 <select
                     value={companyFilter}
                     onChange={e => setCompanyFilter(e.target.value)}
@@ -153,7 +147,6 @@ function CompanyBookingsPage() {
                     {companies.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
 
-                {/* Клиент */}
                 <select
                     value={clientFilter}
                     onChange={e => setClientFilter(e.target.value)}
@@ -198,7 +191,6 @@ function CompanyBookingsPage() {
                                 onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.07)")}
                                 onMouseLeave={e => (e.currentTarget.style.boxShadow = "none")}
                             >
-                                {/* Верхняя полоса: статус + дата */}
                                 <div style={{ padding: "14px 20px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid #f4f4f4" }}>
                                     <StatusBadge status={b.Status} />
                                     {b.CreatedAt && (
@@ -208,10 +200,8 @@ function CompanyBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Основное тело */}
                                 <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
 
-                                    {/* Кто + у кого */}
                                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Клиент</div>
@@ -247,7 +237,6 @@ function CompanyBookingsPage() {
                                         )}
                                     </div>
 
-                                    {/* Услуги */}
                                     {(b.BookingServices ?? []).length > 0 && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.5px" }}>Услуги</div>
@@ -264,7 +253,6 @@ function CompanyBookingsPage() {
                                         </div>
                                     )}
 
-                                    {/* Комментарий */}
                                     {b.Description && (
                                         <div>
                                             <div style={{ fontSize: 11, color: "#aaa", marginBottom: 3, textTransform: "uppercase", letterSpacing: "0.5px" }}>Комментарий</div>
@@ -275,7 +263,6 @@ function CompanyBookingsPage() {
                                     )}
                                 </div>
 
-                                {/* Футер: кнопки действий */}
                                 {nextStatuses.length > 0 && (
                                     <div style={{ padding: "12px 20px", borderTop: "1px solid #f4f4f4", display: "flex", gap: 8 }}>
                                         {nextStatuses.map((s) => (

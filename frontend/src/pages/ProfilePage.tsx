@@ -19,10 +19,8 @@ function ProfilePage() {
     return (
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "72px 32px" }}>
 
-            {/* ── Шапка с аватаром ─────────────────────────────────────── */}
             <div style={{ marginBottom: 48, borderBottom: "1px solid #000", paddingBottom: 32, display: "flex", alignItems: "center", gap: 28 }}>
 
-                {/* Аватар */}
                 <div style={{ position: "relative", flexShrink: 0 }}>
                     <div
                         style={{ width: 120, height: 120, borderRadius: 6, overflow: "hidden", background: "#000", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
@@ -45,7 +43,6 @@ function ProfilePage() {
                     {avatarUploading && <div style={{ position: "absolute", inset: 0, background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 6, fontSize: 10, color: "#000" }}>...</div>}
                 </div>
 
-                {/* Данные */}
                 <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 6 }}>
                         {me?.role === "admin" ? "Администратор" : "Пользователь"}
@@ -102,7 +99,6 @@ function ProfilePage() {
                 </div>
             </div>
 
-            {/* ── Мои бронирования ─────────────────────────────────────── */}
             {stats && (
                 <div style={{ marginBottom: 48 }}>
                     <div style={{ fontSize: 11, fontWeight: 600, color: "#999", textTransform: "uppercase", letterSpacing: "1.2px", marginBottom: 16 }}>
@@ -123,7 +119,6 @@ function ProfilePage() {
                 </div>
             )}
 
-            {/* ── Выход ────────────────────────────────────────────────── */}
             <button
                 onClick={handleLogout}
                 style={{ padding: "10px 24px", border: "1px solid #000", borderRadius: 2, background: "#fff", color: "#000", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: "inherit", transition: "background 0.15s" }}

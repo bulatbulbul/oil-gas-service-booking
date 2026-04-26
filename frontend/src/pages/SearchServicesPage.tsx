@@ -105,7 +105,6 @@ function SearchServicesPage() {
         <div style={pageStyle}>
 
             {selectedService ? (
-                /* ──── Результаты по выбранной услуге ──── */
                 <>
                     <button
                         onClick={clearSelection}
@@ -153,9 +152,7 @@ function SearchServicesPage() {
                     ) : null}
                 </>
             ) : (
-                /* ──── Каталог услуг ──── */
                 <>
-                    {/* Шапка */}
                     <div style={{ marginBottom: 36 }}>
                         <h1 style={{ fontSize: 28, fontWeight: 700, letterSpacing: "-0.8px", marginBottom: 8 }}>
                             Каталог услуг
@@ -165,7 +162,6 @@ function SearchServicesPage() {
                         </p>
                     </div>
 
-                    {/* Поиск по услугам */}
                     <div style={{ position: "relative", marginBottom: 32 }}>
                         <svg
                             width="15" height="15" viewBox="0 0 15 15" fill="none"
@@ -205,18 +201,15 @@ function SearchServicesPage() {
                         )}
                     </div>
 
-                    {/* Счётчик */}
                     {!servicesLoading && (
                         <p style={{ fontSize: 12, color: "#aaa", marginBottom: 16 }}>
                             {filteredServices.length} услуг
                         </p>
                     )}
 
-                    {/* Сетка услуг */}
                     {servicesLoading ? (
                         <p style={{ fontSize: 14, color: "#999" }}>Загрузка...</p>
                     ) : filteredServices.length === 0 && filter.trim() ? (
-                        /* Блок «не нашли — подайте заявку» */
                         <div style={{ maxWidth: 480 }}>
                             {requestSent ? (
                                 <div style={{ padding: "28px 24px", border: "1px solid #e8e8e8", borderRadius: 6, textAlign: "center" }}>
@@ -285,7 +278,6 @@ function SearchServicesPage() {
                 </>
             )}
 
-            {/* Модалка подтверждения бронирования */}
             {pendingCompany && (
                 <div
                     style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.35)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center" }}
@@ -334,7 +326,6 @@ function SearchServicesPage() {
                 </div>
             )}
 
-            {/* Toast */}
             {bookingToast && (
                 <div style={{
                     position: "fixed", bottom: 32, right: 32, zIndex: 1000,

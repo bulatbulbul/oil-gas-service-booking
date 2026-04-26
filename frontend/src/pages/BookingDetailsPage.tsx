@@ -21,7 +21,7 @@ type BookingService = {
 };
 
 function BookingDetailsPage() {
-    const { id } = useParams(); // из /bookings/:id
+    const { id } = useParams();
     const bookingId = Number(id);
 
     const [booking, setBooking] = useState<Booking | null>(null);

@@ -16,7 +16,6 @@ func NewBusinessRepo(db *gorm.DB) *BusinessRepo {
 	return &BusinessRepo{db: db}
 }
 
-// Вспомогательные функции аналог LINQ
 func Where[T any](collection []T, predicate func(T) bool) []T {
 	var result []T
 	for _, item := range collection {
@@ -62,7 +61,6 @@ func (r *BusinessRepo) FindCompaniesByServiceID(serviceID int64) ([]CompanyServi
 	return results, nil
 }
 
-// 2. Поиск пользователей с активными бронированиями
 type UserWithActiveBookings struct {
 	UserID   int64  `json:"user_id"`
 	Name     string `json:"name"`
@@ -72,16 +70,13 @@ type UserWithActiveBookings struct {
 }
 
 func (r *BusinessRepo) FindUsersWithActiveBookings() ([]UserWithActiveBookings, error) {
-	// Получаем всех пользователей с их бронированиями
 	var users []models.User
 	err := r.db.Preload("Bookings").Find(&users).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// Используем Where и Select для преобразования данных
 	activeUsers := Where(users, func(u models.User) bool {
-		// Подсчитываем активные бронирования
 		activeCount := 0
 		for _, booking := range u.Bookings {
 			if booking.Status == "requested" || booking.Status == "approved" {
@@ -91,9 +86,7 @@ func (r *BusinessRepo) FindUsersWithActiveBookings() ([]UserWithActiveBookings, 
 		return activeCount > 0
 	})
 
-	// Используем Select для преобразования в нужную структуру
 	result := Select(activeUsers, func(u models.User) UserWithActiveBookings {
-		// Подсчет активных бронирований
 		activeCount := 0
 		for _, booking := range u.Bookings {
 			if booking.Status == "requested" || booking.Status == "approved" {
@@ -118,7 +111,6 @@ func (r *BusinessRepo) FindUsersWithActiveBookings() ([]UserWithActiveBookings, 
 	return result, nil
 }
 
-// 3. Статистика по компаниям за период
 type CompanyStats struct {
 	CompanyName  string    `json:"company_name"`
 	ServiceCount int       `json:"service_count"`
@@ -127,7 +119,6 @@ type CompanyStats struct {
 }
 
 func (r *BusinessRepo) GetCompanyStats(fromDate, toDate time.Time) ([]CompanyStats, error) {
-	// Получаем все компании с их услугами и бронированиями
 	var companies []models.Company
 	err := r.db.
 		Preload("CompanyServices.BookingServices.Booking").
@@ -137,12 +128,9 @@ func (r *BusinessRepo) GetCompanyStats(fromDate, toDate time.Time) ([]CompanySta
 		return nil, err
 	}
 
-	// Используем Select для создания статистики
 	stats := Select(companies, func(c models.Company) CompanyStats {
-		// Подсчитываем количество услуг
 		serviceCount := len(c.CompanyServices)
 
-		// Подсчитываем бронирования за период
 		bookingCount := 0
 		var lastBooking time.Time
 
@@ -165,7 +153,6 @@ func (r *BusinessRepo) GetCompanyStats(fromDate, toDate time.Time) ([]CompanySta
 		}
 	})
 
-	// Фильтруем компании, у которых есть бронирования в указанный период
 	filteredStats := Where(stats, func(s CompanyStats) bool {
 		return s.BookingCount > 0
 	})
@@ -173,7 +160,6 @@ func (r *BusinessRepo) GetCompanyStats(fromDate, toDate time.Time) ([]CompanySta
 	return filteredStats, nil
 }
 
-// 4. Поиск популярных услуг (услуги с наибольшим количеством бронирований)
 type PopularService struct {
 	ServiceID    int64  `json:"service_id"`
 	Title        string `json:"title"`
@@ -182,7 +168,6 @@ type PopularService struct {
 }
 
 func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) {
-	// Получаем все услуги с их компаниями и бронированиями
 	var services []models.Service
 	err := r.db.
 		Preload("CompanyServices.BookingServices").
@@ -192,12 +177,9 @@ func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) 
 		return nil, err
 	}
 
-	// Используем Select для создания статистики по услугам
 	serviceStats := Select(services, func(s models.Service) PopularService {
-		// Подсчитываем количество компаний, предоставляющих эту услугу
 		companyCount := len(s.CompanyServices)
 
-		// Подсчитываем общее количество бронирований
 		bookingCount := 0
 		for _, cs := range s.CompanyServices {
 			bookingCount += len(cs.BookingServices)
@@ -226,7 +208,6 @@ func (r *BusinessRepo) FindPopularServices(limit int) ([]PopularService, error) 
 	return serviceStats, nil
 }
 
-// 5. Сводная статистика
 type Summary struct {
 	TotalBookings     int64 `json:"total_bookings"`
 	ActiveBookings    int64 `json:"active_bookings"`
@@ -256,7 +237,6 @@ func (r *BusinessRepo) GetSummary() (*Summary, error) {
 	}, nil
 }
 
-// 6. Бронирования по дням
 type BookingByDate struct {
 	Date  string `json:"date"`
 	Count int    `json:"count"`
@@ -273,7 +253,6 @@ func (r *BusinessRepo) GetBookingsByDate(from, to time.Time) ([]BookingByDate, e
 	return rows, err
 }
 
-// 7. Популярные компании
 type PopularCompany struct {
 	CompanyID    int64   `json:"company_id"`
 	Name         string  `json:"name"`
@@ -318,23 +297,20 @@ func (r *BusinessRepo) FindPopularCompanies(limit int) ([]PopularCompany, error)
 	return filtered, nil
 }
 
-// 8. Поиск по всем полям (компании и услуги)
 type SearchResult struct {
-	Type        string `json:"type"` // "company" или "service"
+	Type        string `json:"type"`
 	ID          int64  `json:"id"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
 
 func (r *BusinessRepo) SearchAll(query string) ([]SearchResult, error) {
-	// Получаем все компании
 	var companies []models.Company
 	err := r.db.Find(&companies).Error
 	if err != nil {
 		return nil, err
 	}
 
-	// Получаем все услуги
 	var services []models.Service
 	err = r.db.Find(&services).Error
 	if err != nil {
@@ -343,7 +319,6 @@ func (r *BusinessRepo) SearchAll(query string) ([]SearchResult, error) {
 
 	var results []SearchResult
 
-	// Ищем в компаниях
 	companyResults := Select(Where(companies, func(c models.Company) bool {
 		return strings.Contains(strings.ToLower(c.Name), strings.ToLower(query))
 	}), func(c models.Company) SearchResult {
@@ -355,7 +330,6 @@ func (r *BusinessRepo) SearchAll(query string) ([]SearchResult, error) {
 	})
 	results = append(results, companyResults...)
 
-	// Ищем в услугах
 	serviceResults := Select(Where(services, func(s models.Service) bool {
 		return strings.Contains(strings.ToLower(s.Title), strings.ToLower(query))
 	}), func(s models.Service) SearchResult {

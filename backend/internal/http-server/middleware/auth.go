@@ -16,7 +16,6 @@ const (
 	ctxRoleKey   ctxKey = "role"
 )
 
-// Claims для JWT токена
 type Claims struct {
 	UserID int64  `json:"user_id"`
 	Role   string `json:"role"`
@@ -25,7 +24,6 @@ type Claims struct {
 
 var jwtSecret []byte
 
-// SetJWTSecret устанавливает секретный ключ из конфига (вызывается при старте приложения)
 func SetJWTSecret(secret string) {
 	jwtSecret = []byte(secret)
 }

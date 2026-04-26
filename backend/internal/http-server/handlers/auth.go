@@ -40,7 +40,6 @@ func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{db: db}
 }
 
-// Register godoc
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var in RegisterRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -53,14 +52,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Проверяем, есть ли уже пользователь с таким email
 	var exists models.User
 	if err := h.db.Where("email = ?", in.Email).First(&exists).Error; err == nil {
 		http.Error(w, "user with this email already exists", http.StatusBadRequest)
 		return
 	}
 
-	// Хешируем пароль
 	hash, err := bcrypt.GenerateFromPassword([]byte(in.Password), bcrypt.DefaultCost)
 	if err != nil {
 		http.Error(w, "failed to hash password", http.StatusInternalServerError)
@@ -81,14 +78,12 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Генерируем JWT токен (user.UserID уже int64)
 	token, err := authmw.GenerateToken(user.UserID, user.Role)
 	if err != nil {
 		http.Error(w, "failed to generate token", http.StatusInternalServerError)
 		return
 	}
 
-	// Возвращаем токен и данные пользователя (без пароля)
 	response := TokenResponse{
 		Token: token,
 		Role:  user.Role,
@@ -108,7 +103,6 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Login godoc
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var in LoginRequest
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
@@ -126,20 +120,17 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Сравниваем хеш пароля
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(in.Password)); err != nil {
 		http.Error(w, "invalid credentials", http.StatusUnauthorized)
 		return
 	}
 
-	// Генерируем JWT токен (user.UserID уже int64)
 	token, err := authmw.GenerateToken(user.UserID, user.Role)
 	if err != nil {
 		http.Error(w, "failed to generate token", http.StatusInternalServerError)
 		return
 	}
 
-	// Возвращаем токен и данные пользователя
 	response := TokenResponse{
 		Token: token,
 		Role:  user.Role,
@@ -158,7 +149,6 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-// Me godoc
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -182,7 +172,6 @@ func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// UpdateMe godoc
 func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	userID, role, ok := authmw.GetUserFromContext(r)
 	if !ok {
@@ -230,7 +219,6 @@ func (h *AuthHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-// MyStats godoc
 func (h *AuthHandler) MyStats(w http.ResponseWriter, r *http.Request) {
 	userID, _, ok := authmw.GetUserFromContext(r)
 	if !ok {

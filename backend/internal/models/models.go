@@ -4,7 +4,7 @@ import "time"
 
 type Company struct {
 	CompanyID   int64     `gorm:"column:company_id;primaryKey;autoIncrement"`
-	UserID      int64     `gorm:"column:user_id;not null;index"` // владелец
+	UserID      int64     `gorm:"column:user_id;not null;index"`
 	Name        string    `gorm:"column:name;not null"`
 	Description *string   `gorm:"column:description"`
 	Address     *string   `gorm:"column:address"`
@@ -35,7 +35,7 @@ type CompanyService struct {
 	CompanyServiceID int64     `gorm:"column:company_service_id;primaryKey;autoIncrement"`
 	CompanyID        int64     `gorm:"column:company_id;not null;index"`
 	ServiceID        int64     `gorm:"column:service_id;not null;index"`
-	Price            *float64  `gorm:"column:price"` // цена конкретной услуги у компании
+	Price            *float64  `gorm:"column:price"`
 	CreatedAt        time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt        time.Time `gorm:"column:updated_at;autoUpdateTime"`
 
@@ -56,7 +56,6 @@ type User struct {
 	CreatedAt time.Time `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time `gorm:"column:updated_at;autoUpdateTime"`
 
-	// Добавляем обратную связь
 	Companies []Company `gorm:"foreignKey:UserID"`
 	Bookings  []Booking `gorm:"foreignKey:UserID"`
 }
@@ -97,7 +96,7 @@ type ServiceRequest struct {
 	UserID      int64     `gorm:"column:user_id;not null;index" json:"user_id"`
 	ServiceName string    `gorm:"column:service_name;not null" json:"service_name"`
 	Comment     *string   `gorm:"column:comment" json:"comment"`
-	Status      string    `gorm:"column:status;default:'pending'" json:"status"` // pending, reviewed
+	Status      string    `gorm:"column:status;default:'pending'" json:"status"`
 	CreatedAt   time.Time `gorm:"column:created_at;autoCreateTime" json:"created_at"`
 
 	User      User                     `gorm:"foreignKey:UserID;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"user,omitempty"`

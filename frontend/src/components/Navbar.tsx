@@ -25,9 +25,9 @@ function Navbar() {
 
     useEffect(() => {
         if (!token) return;
-        getUnreadCount().then(setUnreadCount).catch(() => {});
+        getUnreadCount().then(setUnreadCount).catch(() => setUnreadCount(0));
         const interval = setInterval(() => {
-            getUnreadCount().then(setUnreadCount).catch(() => {});
+            getUnreadCount().then(setUnreadCount).catch(() => setUnreadCount(0));
         }, 30000);
         return () => clearInterval(interval);
     }, [token]);
@@ -62,10 +62,34 @@ function Navbar() {
                 background: "#fff",
                 display: "flex",
                 alignItems: "center",
-                gap: 24,
-                height: 44,
+                gap: 32,
+                height: 52,
             }}
         >
+            <Link
+                to="/search"
+                style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, flexShrink: 0, marginRight: 8 }}
+            >
+                <div style={{
+                    width: 30,
+                    height: 30,
+                    background: "#000",
+                    borderRadius: 6,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                }}>
+                    <span style={{ color: "#fff", fontSize: 11, fontWeight: 800, letterSpacing: "0.5px" }}>OG</span>
+                </div>
+                <div style={{ display: "flex", flexDirection: "column", lineHeight: 1.2 }}>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: "#000", letterSpacing: "-0.3px" }}>OilGas</span>
+                    <span style={{ fontSize: 10, fontWeight: 400, color: "#999", letterSpacing: "0.2px" }}>Booking</span>
+                </div>
+            </Link>
+
+            <div style={{ width: 1, height: 20, background: "#e8e8e8", flexShrink: 0 }} />
+
             <Link to="/search" style={linkStyle("/search")}>Поиск услуги</Link>
             <Link to="/bookings/my" style={linkStyle("/bookings/my")}>Мои брони</Link>
             <Link to="/bookings/company" style={linkStyle("/bookings/company")}>Входящие заявки</Link>
@@ -88,7 +112,6 @@ function Navbar() {
                     </Link>
                 )}
 
-                {/* Уведомления */}
                 <Link
                     to="/notifications"
                     title="Уведомления"
@@ -112,7 +135,6 @@ function Navbar() {
                     )}
                 </Link>
 
-                {/* Avatar link to profile */}
                 <Link
                     to="/profile"
                     title="Профиль"
@@ -128,17 +150,15 @@ function Navbar() {
                 >
                     <div
                         style={{
-                            width: 36,
-                            height: 36,
+                            width: 28,
+                            height: 28,
                             background: "#000",
-                            borderRadius: 3,
+                            borderRadius: 50,
                             overflow: "hidden",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
                             flexShrink: 0,
-                            boxShadow: "0 0 0 2px #000, 0 0 0 4px #fff",
-                            transition: "box-shadow 0.15s",
                         }}
                     >
                         {avatarSrc ? (
@@ -148,7 +168,7 @@ function Navbar() {
                                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
                             />
                         ) : (
-                            <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, letterSpacing: "0.5px" }}>
+                            <span style={{ color: "#fff", fontSize: 11, fontWeight: 700, letterSpacing: "0.5px" }}>
                                 {initials}
                             </span>
                         )}
@@ -166,18 +186,18 @@ function Navbar() {
                     onClick={handleLogout}
                     style={{
                         padding: "5px 14px",
-                        border: "1px solid #000",
+                        border: "1px solid #e8e8e8",
                         borderRadius: 2,
                         fontSize: 13,
                         fontWeight: 500,
                         background: "#fff",
-                        color: "#000",
+                        color: "#666",
                         cursor: "pointer",
                         fontFamily: "inherit",
-                        transition: "background 0.15s",
+                        transition: "all 0.15s",
                     }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "#f4f4f4")}
-                    onMouseLeave={e => (e.currentTarget.style.background = "#fff")}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor = "#000"; e.currentTarget.style.color = "#000"; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor = "#e8e8e8"; e.currentTarget.style.color = "#666"; }}
                 >
                     Выйти
                 </button>

@@ -42,7 +42,6 @@ func (r *BookingRepo) Delete(id int64) error {
 	return r.db.Delete(&models.Booking{}, id).Error
 }
 
-// GetByUserID - получить бронирования пользователя
 func (r *BookingRepo) GetByUserID(userID int64) ([]models.Booking, error) {
 	var bookings []models.Booking
 
@@ -55,7 +54,6 @@ func (r *BookingRepo) GetByUserID(userID int64) ([]models.Booking, error) {
 	return bookings, err
 }
 
-// UpdateStatus - обновить статус бронирования
 func (r *BookingRepo) UpdateStatus(bookingID int64, status string) error {
 	return r.db.
 		Model(&models.Booking{}).
@@ -63,7 +61,6 @@ func (r *BookingRepo) UpdateStatus(bookingID int64, status string) error {
 		Update("status", status).Error
 }
 
-// GetByCompanyOwner - получить бронирования, в которых есть услуги компаний владельца
 func (r *BookingRepo) GetByCompanyOwner(ownerUserID int64) ([]models.Booking, error) {
 	var bookings []models.Booking
 	err := r.db.
@@ -79,7 +76,6 @@ func (r *BookingRepo) GetByCompanyOwner(ownerUserID int64) ([]models.Booking, er
 	return bookings, err
 }
 
-// IsBookingOwnedByCompanyOwner - проверить, есть ли в бронировании услуги компаний пользователя
 func (r *BookingRepo) IsBookingOwnedByCompanyOwner(bookingID, ownerUserID int64) (bool, error) {
 	var count int64
 	err := r.db.
